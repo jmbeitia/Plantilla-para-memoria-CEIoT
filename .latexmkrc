@@ -9,4 +9,5 @@ $bibtex_use = 2;
 $pdflatex = 'pdflatex -synctex=1 -interaction=nonstopmode -file-line-error %O %S';
 
 # Archivos auxiliares a limpiar con: latexmk -c
-$clean_ext = 'bbl run.xml synctex.gz';
+# (synctex.gz NO se limpia: hace falta para saltar PDF <-> .tex)
+$clean_ext = 'bbl run.xml';

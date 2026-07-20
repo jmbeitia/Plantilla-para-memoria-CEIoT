@@ -9,5 +9,25 @@
   // Ver el PDF en una pestaña de VSCode (no en el navegador) para poder ponerlo al lado del .tex
   "latex-workshop.view.pdf.viewer": "tab",
   // Abrir la pestaña del PDF en un grupo nuevo a la derecha del editor
-  "latex-workshop.view.pdf.tab.editorGroup": "right"
+  "latex-workshop.view.pdf.tab.editorGroup": "right",
+
+  // Ajustes de lectura para archivos .tex: que el párrafo se ajuste al ancho
+  // de la ventana (sin scroll horizontal) y con más espacio entre líneas
+  "[latex]": {
+    "editor.wordWrap": "on",
+    "editor.fontSize": 12,
+    "editor.lineHeight": 22,
+    "editor.rulers": [],
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "james-yu.latex-workshop"
+  },
+
+  // Corrector ortográfico (Code Spell Checker): español + inglés técnico
+  "cSpell.language": "es,en",
+
+  // Auto-indentado: usar latexindent como formateador, vía wrapper que
+  // carga los módulos Perl instalados en ~/.latexindent-perl5
+  // (no toca el Perl del sistema)
+  "latex-workshop.formatting.latex": "latexindent",
+  "latex-workshop.formatting.latexindent.path": "/Users/jmbeitia/bin/latexindent-wrapper.sh"
 }
