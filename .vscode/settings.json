@@ -5,5 +5,9 @@
   "latex-workshop.latex.autoBuild.run": "onSave",
   // Limpiar auxiliares al cerrar, dejando solo el PDF
   "latex-workshop.latex.autoClean.run": "onBuilt",
-  "latex-workshop.latex.clean.subfolder.enabled": true
+  "latex-workshop.latex.clean.subfolder.enabled": true,
+  // Ver el PDF en una pestaña de VSCode (no en el navegador) para poder ponerlo al lado del .tex
+  "latex-workshop.view.pdf.viewer": "tab",
+  // Abrir la pestaña del PDF en un grupo nuevo a la derecha del editor
+  "latex-workshop.view.pdf.tab.editorGroup": "right"
 }
