@@ -76,8 +76,10 @@
 %----------------------------------------------------------------------------------------
 
 \begin{abstract}
-\addchaptertocentry{\abstractname} % Agregar resumen al índice
-El resumen debe escribirse en uno o dos párrafos. Debe ser breve y conciso, sin ningún elemento de formato en el texto como itálicas o negritas. Tampoco se deben usar siglas ni acrónimos que no resulten obvios para un lector promedio de la memoria, ni referencias bibliográficas o notas al pie de página. No debe faltar qué es lo que se hizo/logró, qué importancia/valor tiene el proyecto/resultado, qué va a encontrar el lector en la memoria y qué contenidos de la especialización/maestría se aplicaron en el proyecto.
+\addchaptertocentry{\abstractname}
+El presente trabajo consiste en el diseño e implementación de un sistema que automatiza la recepción, interpretación y el procesamiento de los pedidos de un mercado de frutas y verduras recibidos a través de mensajería instantánea. El sistema captura pedidos en texto, voz o imagen, e identifica productos, cantidades y unidades mediante modelos de inteligencia artificial. Una vez estructurado el pedido, se imprime en el comercio mediante una impresora térmica conectada a un servidor local. El desarrollo fue realizado para la Tienda de frutas Luján, con el fin de reducir los tiempos operativos, disminuir los errores humanos y mejorar la trazabilidad de la gestión comercial.
+
+La solución se estructura sobre una arquitectura de cómputo distribuida entre el comercio y la nube, en la que las tareas críticas y de baja latencia se ejecutan localmente, mientras que las de mayor demanda de procesamiento se delegan a servicios remotos. El sistema se encuentra operativo en el comercio, donde procesa los pedidos en tiempo real y deja cada pedido listo para su preparación en menos de un minuto desde su recepción. Para su desarrollo se aplicaron conocimientos propios de la computación de borde, tales como la distribución del procesamiento entre el borde y la nube, la comunicación segura entre nodos, la actuación local sobre hardware y el diseño de soluciones de bajo costo.
 \end{abstract}
 
 %----------------------------------------------------------------------------------------
@@ -86,7 +88,11 @@ El resumen debe escribirse en uno o dos párrafos. Debe ser breve y conciso, sin
 
 \begin{acknowledgements}
 \vspace{1.5cm}
-Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONAL}.
+Quiero expresar mi agradecimiento a la Tienda de frutas Luján, y en particular a Marcos y Cristian Cestari, por la confianza depositada en este proyecto y por abrir las puertas de su comercio para el desarrollo y la validación del sistema. Su predisposición y su conocimiento del negocio fueron fundamentales para orientar el trabajo hacia una solución realmente útil.
+
+Agradezco también a mi director, Matías Martini, cuya orientación y experiencia en desarrollo de software e inteligencia artificial aplicada guiaron las decisiones técnicas a lo largo del desarrollo.
+
+Mi reconocimiento se extiende a mis compañeros y colegas, cuya colaboración fue esencial para superar los desafíos surgidos durante la implementación. Por último, agradezco a mis amigos y a mi familia, cuya paciencia y aliento incondicional fueron mi sostén durante este proceso, permitiéndome perseguir mis proyectos y crecer profesionalmente.
 \end{acknowledgements}
 
 %----------------------------------------------------------------------------------------
@@ -101,7 +107,7 @@ Esta sección es para agradecimientos personales y es totalmente \textbf{OPCIONA
 % Dedicatoria
 %----------------------------------------------------------------------------------------
 
-\dedicatory{\textbf{Dedicado a... [OPCIONAL]}}
+\dedicatory{A mi familia.}
 
 %----------------------------------------------------------------------------------------
 % Capítulos

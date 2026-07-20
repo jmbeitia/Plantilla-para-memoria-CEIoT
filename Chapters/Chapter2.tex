@@ -1,184 +1,114 @@
+% Chapter 2
+
 \chapter{Introducción específica} % Main chapter title
 
-\label{Chapter2}
+\label{Chapter2} % Para referenciar este capítulo: \ref{Chapter2}
+
+En el presente capítulo se describen las tecnologías, plataformas y componentes de terceros sobre los que se apoya el sistema desarrollado. El objetivo es que el lector conozca las herramientas empleadas antes de abordar, en el capítulo \ref{Chapter3}, el diseño y la implementación propios del trabajo. Se describen únicamente los elementos que no fueron desarrollados por el autor y que resultan necesarios para comprender la solución, junto con la justificación de cada elección frente a sus alternativas. Los fundamentos de inteligencia artificial se dan por conocidos y los modelos de aprendizaje automático se presentan de manera acotada, poniendo el énfasis en los componentes propios de la computación de borde y de la infraestructura distribuida.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
 %----------------------------------------------------------------------------------------
-Todos los capítulos deben comenzar con un breve párrafo introductorio que indique cuál es el contenido que se encontrará al leerlo.  La redacción sobre el contenido de la memoria debe hacerse en presente y todo lo referido al proyecto en pasado, siempre de modo impersonal.
 
-\section{Estilo y convenciones}
-\label{sec:ejemplo}
+\section{Dispositivos de borde}
+\label{sec:dispositivos_borde}
 
-\subsection{Uso de mayúscula inicial para los título de secciones}
+El nodo de borde del sistema está constituido por un servidor local instalado en el comercio y por una impresora térmica conectada a él. A diferencia de un sistema de Internet de las cosas tradicional, no se emplean microcontroladores ni sensores: el dispositivo de borde es un equipo de cómputo de propósito general que ejecuta los servicios locales y comanda la impresión de los pedidos.
 
-Si en el texto se hace alusión a diferentes partes del trabajo referirse a ellas como capítulo, sección o subsección según corresponda. Por ejemplo: ``En el capítulo \ref{Chapter1} se explica tal cosa'', o ``En la sección \ref{sec:ejemplo} se presenta lo que sea'', o ``En la subsección \ref{subsec:ejemplo} se discute otra cosa''.
+\subsection{Servidor local}
+\label{subsec:servidor_local}
 
-Cuando se quiere poner una lista tabulada, se hace así:
+Como servidor local se utiliza una computadora con sistema operativo Windows Server, propiedad del cliente y preexistente en el local. Sobre este equipo se ejecutan el servidor de impresión y el cliente del túnel seguro hacia la nube, descriptos en el capítulo \ref{Chapter3}.
+% [PENDIENTE: indicar la versión de Windows Server y, si se conocen, las
+% características básicas del equipo (procesador, memoria).]
 
-\begin{itemize}
-	\item Este es el primer elemento de la lista.
-	\item Este es el segundo elemento de la lista.
-\end{itemize}
+La decisión de reutilizar el equipo existente, en lugar de incorporar una computadora de placa única (SBC, del inglés \textit{Single Board Computer}) dedicada, como una Raspberry Pi, responde a tres criterios. El primero es el costo: el trabajo se planteó como una solución de bajo costo para un comercio pequeño, y la reutilización del hardware disponible elimina la inversión marginal en equipamiento. El segundo es la operación: el equipo ya se encuentra en el local, permanece encendido durante el horario comercial y es conocido por el personal, lo que simplifica la instalación y el mantenimiento. El tercero es la compatibilidad: la impresora térmica seleccionada provee controladores para Windows, de modo que la integración no requiere desarrollos adicionales de bajo nivel. Como contrapartida, un equipo de propósito general consume más energía que una SBC dedicada y depende del uso compartido que el comercio haga de él; esta contrapartida se consideró aceptable frente a la simplicidad operativa obtenida.
 
-Notar el uso de las mayúsculas y el punto al final de cada elemento.
+En cualquier caso, un microcontrolador no habría sido una alternativa viable: ejecutar un servidor web local, sostener el cliente del túnel y administrar la cola de impresión son responsabilidades que exceden las capacidades de un microcontrolador típico y que se resuelven con naturalidad en un sistema operativo completo.
 
-Si se desea poner una lista numerada el formato es este:
+\subsection{Impresora térmica}
+\label{subsec:impresora}
 
-\begin{enumerate}
-	\item Este es el primer elemento de la lista.
-	\item Este es el segundo elemento de la lista.
-\end{enumerate}
+Para la impresión de los tickets se utiliza una impresora térmica Hasar P-HAS-181 \cite{hasar181}, un modelo de tipo comandera del fabricante argentino Grupo Hasar, orientado al punto de venta. La impresora imprime por cabezal térmico directo sobre rollos de papel de 80 mm de ancho, con corte automático de papel, resolución de 203 dpi (del inglés, \textit{dots per inch}, puntos por pulgada) y soporte de códigos de barras y códigos QR. Dispone de tres interfaces de conexión (puerto serie, USB del inglés, \textit{Universal Serial Bus} y Ethernet) y de controladores para Windows, y sus comandos de impresión son compatibles con el estándar de facto ESC/POS.
+% [PENDIENTE: indicar la interfaz de conexión utilizada en la instalación (USB o
+% Ethernet).]
 
-Notar el uso de las mayúsculas y el punto al final de cada elemento.
+La elección de este modelo se fundamenta en cuatro factores. Primero, la impresión térmica es el estándar del comercio minorista por su velocidad y su bajo costo operativo, dado que no utiliza tinta ni cartuchos. Segundo, la compatibilidad con ESC/POS permite comandar la impresora desde bibliotecas de software ampliamente disponibles, sin depender de un protocolo propietario. Tercero, la disponibilidad de controladores para Windows garantiza la integración directa con el servidor local descripto en la sección \ref{subsec:servidor_local}. Cuarto, al tratarse de un fabricante nacional con presencia establecida en el mercado argentino, se asegura la disponibilidad local de insumos, repuestos y servicio técnico, un criterio relevante para un comercio sin personal técnico propio.
 
-\subsection{Este es el título de una subsección}
-\label{subsec:ejemplo}
+%----------------------------------------------------------------------------------------
+%	SECTION 2
+%----------------------------------------------------------------------------------------
 
-Se recomienda no utilizar \textbf{texto en negritas} en ningún párrafo, ni tampoco texto \underline{subrayado}. En cambio sí se debe utilizar \textit{texto en itálicas} para palabras en un idioma extranjero, al menos la primera vez que aparecen en el texto. En el caso de palabras que estamos inventando se deben utilizar ``comillas'', así como también para citas textuales. Por ejemplo, un \textit{digital filter} es una especie de ``selector'' que permite separar ciertos componentes armónicos en particular.
+\section{Protocolos de comunicación}
+\label{sec:protocolos}
 
-La escritura debe ser impersonal. Por ejemplo, no utilizar ``el diseño del firmware lo hice de acuerdo con tal principio'', sino ``el firmware fue diseñado utilizando tal principio''. 
+La comunicación del sistema no se apoya en los protocolos habituales de las redes de sensores (como MQTT o LoRaWAN), sino en protocolos y servicios de la web. El intercambio de mensajes entre los distintos componentes se realiza mediante el protocolo HTTP (del inglés, \textit{Hypertext Transfer Protocol}) sobre interfaces de tipo REST (del inglés, \textit{Representational State Transfer}), un estilo de comunicación basado en peticiones y respuestas sobre recursos. Esta elección responde a que todos los servicios involucrados (la pasarela de mensajería, los modelos de inteligencia artificial y las herramientas de automatización) exponen sus funcionalidades a través de interfaces de programación de aplicaciones (API, del inglés \textit{Application Programming Interface}) basadas en HTTP. Para los eventos asincrónicos, como la llegada de un mensaje, se emplea el mecanismo de notificaciones automáticas (\textit{webhooks}): el servicio que origina el evento emite una petición HTTP hacia una dirección configurada por el sistema receptor, invirtiendo el sentido habitual de la comunicación.
 
-El trabajo es algo que al momento de escribir la memoria se supone que ya está concluido, entonces todo lo que se refiera a hacer el trabajo se narra en tiempo pasado, porque es algo que ya ocurrió. Por ejemplo, "se diseñó el firmware empleando la técnica de test driven development".
+\subsection{Canal de mensajería}
+\label{subsec:whatsapp}
 
-En cambio, la memoria es algo que está vivo cada vez que el lector la lee. Por eso transcurre siempre en tiempo presente, como por ejemplo:
+La vinculación con WhatsApp se realiza mediante Evolution API \cite{evolutionapi}, una pasarela de mensajería de código abierto que expone las funciones de WhatsApp a través de una API REST y de \textit{webhooks}. Evolution API admite dos modos de conexión: uno basado en el protocolo de WhatsApp Web (mediante la biblioteca Baileys), que no requiere verificación comercial ante Meta, y otro basado en la API oficial WhatsApp Business Cloud \cite{whatsappbusiness}. En este trabajo se utiliza el primer modo, y ante cada mensaje entrante (texto, voz o imagen) la pasarela emite una notificación con el contenido del mensaje o las referencias para descargarlo.
 
-``En el presente capítulo se da una visión global sobre las distintas pruebas realizadas y los resultados obtenidos. Se explica el modo en que fueron llevados a cabo los test unitarios y las pruebas del sistema''.
+La elección de Evolution API para la etapa inicial del proyecto se fundamenta en su costo nulo, en la rapidez de puesta en marcha (no requiere el proceso de verificación comercial ni la aprobación de plantillas de la API oficial) y en su despliegue autoalojado, coherente con la infraestructura contenerizada del sistema. Su principal limitación es que el modo basado en WhatsApp Web es un mecanismo no oficial, con posibles restricciones de estabilidad y de cumplimiento frente a la API oficial. Por este motivo, el sistema fue diseñado para ser compatible con la API de WhatsApp Business, y se encuentra prevista la migración inminente a la API oficial de Meta. Esta compatibilidad fue establecida como requerimiento de interoperabilidad desde la planificación del proyecto, de modo que la migración no implica cambios estructurales en los flujos de procesamiento.
 
-Se recomienda no utilizar una sección de glosario sino colocar la descripción de las abreviaturas como parte del mismo cuerpo del texto. Por ejemplo, RTOS (\textit{Real Time Operating System}, Sistema Operativo de Tiempo Real) o en caso de considerarlo apropiado mediante notas a pie de página.
+\subsection{Comunicación segura con la nube}
+\label{subsec:cloudflare}
 
-Si se desea indicar alguna página web utilizar el siguiente formato de referencias bibliográficas, dónde las referencias se detallan en la sección de bibliografía de la memoria, utilizado el formato establecido por IEEE en \citep{IEEE:citation}. Por ejemplo, ``el presente trabajo se basa en la plataforma EDU-CIAA-NXP \citep{CIAA}, la cual...''.
+Para vincular los servicios en la nube con el servidor local sin necesidad de abrir puertos en la red del comercio, se emplea un túnel seguro provisto por Cloudflare \cite{cloudflaretunnel}. Un cliente ligero que se ejecuta en el servidor local establece una conexión cifrada saliente hacia la infraestructura de Cloudflare, a través de la cual los servicios remotos pueden alcanzar al nodo de borde.
 
-\subsection{Figuras} 
+Las alternativas consideradas presentaban desventajas claras para este escenario. La exposición directa del servidor mediante la apertura de puertos en el enrutador del local requiere una dirección IP pública o un servicio de DNS dinámico, exige configurar el equipamiento de red del comercio y deja un servicio escuchando conexiones entrantes desde Internet, lo que amplía la superficie de ataque. Una red privada virtual (VPN, del inglés \textit{Virtual Private Network}) entre la nube y el local resuelve la seguridad, pero agrega administración de claves y configuración en ambos extremos. El túnel de Cloudflare, en cambio, no requiere configuración alguna del enrutador (la conexión es saliente, como la de cualquier navegador), cifra el tráfico de extremo a extremo y mantiene la red interna del comercio sin exposición entrante, todo con una operación mínima, condición determinante en un local sin personal técnico.
 
-Al insertar figuras en la memoria se deben considerar determinadas pautas. Para empezar, usar siempre tipografía claramente legible. Luego, tener claro que \textbf{es incorrecto} escribir por ejemplo esto: ``El diseño elegido es un cuadrado, como se ve en la siguiente figura:''
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
 
-\begin{figure}[h]
-\centering
-\includegraphics[scale=.45]{./Figures/cuadradoAzul.png}
-\end{figure}
+\section{Plataformas cloud y servicios}
+\label{sec:plataformas_cloud}
 
-La forma correcta de utilizar una figura es con referencias cruzadas, por ejemplo: ``Se eligió utilizar un cuadrado azul para el logo, como puede observarse en la figura \ref{fig:cuadradoAzul}''.
+\subsection{Orquestación de flujos de trabajo}
+\label{subsec:n8n}
 
-\begin{figure}[ht]
-	\centering
-	\includegraphics[scale=.45]{./Figures/cuadradoAzul.png}
-	\caption{Ilustración del cuadrado azul que se eligió para el diseño del logo.}
-	\label{fig:cuadradoAzul}
-\end{figure}
+La orquestación de las tareas de recepción, interpretación y estructuración de los pedidos se realiza con n8n \cite{n8n}, una plataforma de automatización de flujos de trabajo de código abierto. En n8n, la lógica se construye conectando nodos configurables (disparadores, transformaciones, integraciones con servicios externos) en flujos visuales, lo que permite integrar servicios heterogéneos sin desarrollar desde cero la lógica de integración. Además de los nodos tradicionales, n8n incorpora agentes de inteligencia artificial (\textit{AI Agents}) que permiten encadenar modelos de lenguaje con herramientas y fuentes de datos, capacidad sobre la que se apoya la interpretación de los pedidos descripta en el capítulo \ref{Chapter3}.
 
-El texto de las figuras debe estar siempre en español, excepto que se decida reproducir una figura original tomada de alguna referencia. En ese caso la referencia de la cual se tomó la figura debe ser indicada en el epígrafe de la figura e incluida como una nota al pie, como se ilustra en la figura \ref{fig:palabraIngles}.
+Frente a alternativas comerciales de automatización en la nube, como Zapier \cite{zapier}, n8n presenta dos ventajas decisivas para este trabajo: puede autoalojarse en la propia infraestructura (sin costo por tarea ejecutada, un factor crítico dado el volumen diario de mensajes) y mantiene los datos de los clientes dentro del entorno controlado por el sistema, sin atravesar una plataforma de terceros adicional. En este trabajo, n8n se despliega autoalojado en el servidor virtual descripto a continuación.
 
-\begin{figure}[htpb]
-	\centering
-	\includegraphics[scale=.3]{./Figures/word.jpeg}
-	\caption{Imagen tomada de la página oficial del procesador\protect\footnotemark.}
-	\label{fig:palabraIngles}
-\end{figure}
+\subsection{Infraestructura de despliegue}
+\label{subsec:vps_docker}
 
-\footnotetext{Imagen tomada de \url{https://goo.gl/images/i7C70w}}
+Los servicios en la nube se alojan en un servidor privado virtual (VPS, del inglés \textit{Virtual Private Server}) del proveedor Hostinger \cite{hostinger}, en su plan KVM 4, que provee 4 núcleos virtuales de procesamiento, 16 GB de memoria RAM, 200 GB de almacenamiento NVMe (del inglés, \textit{Non-Volatile Memory Express}) y 16 TB de transferencia mensual. El dimensionamiento responde a la carga concurrente del sistema: sobre el mismo servidor conviven la pasarela de mensajería, el motor de flujos, las bases de datos y el panel web, y el almacenamiento NVMe favorece la baja latencia de las operaciones de base de datos.
 
-La figura y el epígrafe deben conformar una unidad cuyo significado principal pueda ser comprendido por el lector sin necesidad de leer el cuerpo central de la memoria. Para eso es necesario que el epígrafe sea todo lo detallado que corresponda y si en la figura se utilizan abreviaturas entonces aclarar su significado en el epígrafe o en la misma figura.
+Todos los servicios se despliegan de forma contenerizada mediante Docker \cite{docker}. La contenerización empaqueta cada servicio junto con sus dependencias en unidades aisladas y reproducibles, lo que aporta tres beneficios concretos: el despliegue completo del sistema se describe en archivos versionables, el entorno puede reproducirse en otro servidor (o en un entorno local de pruebas) sin diferencias de configuración, y cada servicio puede actualizarse o reiniciarse de manera independiente sin afectar al resto.
 
+\subsection{Servicios de inteligencia artificial}
+\label{subsec:servicios_ia}
 
+La interpretación de los pedidos se apoya en modelos de inteligencia artificial consumidos como servicios en la nube, provistos por OpenAI \cite{openai} y por Anthropic \cite{claude}. Para la transcripción de los mensajes de voz se emplea el servicio de transcripción de audio de OpenAI, basado en el modelo Whisper \cite{whisper}, robusto frente al ruido y a la variabilidad de los hablantes. Para la lectura de los pedidos enviados como imagen se utilizan modelos multimodales de visión de OpenAI y de Anthropic (Claude), en lugar de un motor de reconocimiento óptico de caracteres (OCR) clásico: las imágenes recibidas son mayormente listas manuscritas fotografiadas con el teléfono, con caligrafías variables, iluminación irregular y encuadres informales, un escenario en el que el OCR tradicional pierde precisión y los modelos de visión, que interpretan el contenido en contexto, obtienen mejores resultados. La estructuración final del pedido en lenguaje natural se resuelve mediante un modelo extenso de lenguaje (LLM, del inglés \textit{Large Language Model}).
+% [PENDIENTE: indicar el nombre y la versión exactos de los modelos utilizados
+% (transcripción, visión y estructuración) y el criterio con el que se combinan los
+% modelos de OpenAI y de Anthropic para las imágenes (por ejemplo, respaldo ante falla
+% o selección por tipo de imagen).]
 
-\begin{figure}[ht]
-	\centering
-	\includegraphics[scale=.37]{./Figures/questionMark.png}
-	\caption{¿Por qué de pronto aparece esta figura?}
-	\label{fig:questionMark}
-\end{figure}
+Por tratarse de conocimientos abordados en la especialización previa, estos modelos se describen aquí únicamente en su rol dentro del sistema; su integración concreta en los flujos se detalla en el capítulo \ref{Chapter3}. La decisión de consumirlos como servicio, en lugar de ejecutar modelos propios, mantiene el costo inicial y la complejidad operativa en el mínimo, al precio de un costo variable por uso y de la dependencia de la conectividad, compromiso que se analiza en los capítulos \ref{Chapter4} y \ref{Chapter5}.
 
-Nunca colocar una figura en el documento antes de hacer la primera referencia a ella, como se ilustra con la figura \ref{fig:questionMark}, porque sino el lector no comprenderá por qué de pronto aparece la figura en el documento, lo que distraerá su atención.
+%----------------------------------------------------------------------------------------
+%	SECTION 4
+%----------------------------------------------------------------------------------------
 
-Otra posibilidad es utilizar el entorno \textit{subfigure} para incluir más de una figura, como se puede ver en la figura \ref{fig:three graphs}. Notar que se pueden referenciar también las figuras internas individualmente de esta manera: \ref{fig:1de3}, \ref{fig:2de3} y \ref{fig:3de3}.
- 
-\begin{figure}[!htpb]
-     \centering
-     \begin{subfigure}[b]{0.3\textwidth}
-         \centering
-         \includegraphics[width=.65\textwidth]{./Figures/questionMark}
-         \caption{Un caption.}
-         \label{fig:1de3}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.3\textwidth}
-         \centering
-         \includegraphics[width=.65\textwidth]{./Figures/questionMark}
-         \caption{Otro.}
-         \label{fig:2de3}
-     \end{subfigure}
-     \hfill
-     \begin{subfigure}[b]{0.3\textwidth}
-         \centering
-         \includegraphics[width=.65\textwidth]{./Figures/questionMark}
-         \caption{Y otro más.}
-         \label{fig:3de3}
-     \end{subfigure}
-        \caption{Tres gráficos simples.}
-        \label{fig:three graphs}
-\end{figure}
+\section{Herramientas de almacenamiento y visualización}
+\label{sec:almacenamiento_visualizacion}
 
-El código para generar las imágenes se encuentra disponible para su reutilización en el archivo \file{Chapter2.tex}.
+\subsection{Bases de datos}
+\label{subsec:bases_datos}
 
-\subsection{Tablas}
+La información de pedidos, clientes y productos se almacena en PostgreSQL \cite{postgresql}, una base de datos relacional de código abierto, madura y ampliamente adoptada. Su modelo relacional con integridad referencial resulta adecuado para el dominio del problema: los pedidos se vinculan con clientes y con productos del catálogo, y la trazabilidad exigida al sistema (reconstruir el recorrido de cada pedido desde el mensaje original hasta la impresión) requiere garantías de consistencia transaccional y la posibilidad de consultas estructuradas sobre el historial, que además alimentan las métricas del panel de control.
 
-Para las tablas utilizar el mismo formato que para las figuras, sólo que el epígrafe se debe colocar arriba de la tabla, como se ilustra en la tabla \ref{tab:peces}. Observar que sólo algunas filas van con líneas visibles y notar el uso de las negritas para los encabezados.  La referencia se logra utilizando el comando \verb|\ref{<label>}| donde label debe estar definida dentro del entorno de la tabla.
+De manera complementaria se emplea Redis \cite{redis}, una base de datos en memoria de tipo clave-valor, para la gestión de las sesiones y del estado de los clientes activos durante la recepción de un pedido. Redis ofrece tiempos de acceso muy bajos y expiración automática de claves, características apropiadas para datos de vida corta que se leen y escriben con alta frecuencia durante una conversación. La combinación responde a un criterio de diseño explícito: los datos persistentes y auditables residen exclusivamente en la base relacional, mientras que Redis se reserva para datos temporales, de modo que una eventual falla de la capa en memoria no comprometa la información del negocio.
 
-\begin{verbatim}
-\begin{table}[h]
-	\centering
-	\caption[caption corto]{caption largo más descriptivo}
-	\begin{tabular}{l c c}    
-		\toprule
-		\textbf{Especie}     & \textbf{Tamaño} & \textbf{Valor}\\
-		\midrule
-		Amphiprion Ocellaris & 10 cm           & \$ 6.000 \\		
-		Hepatus Blue Tang    & 15 cm           & \$ 7.000 \\
-		Zebrasoma Xanthurus  & 12 cm           & \$ 6.800 \\
-		\bottomrule
-		\hline
-	\end{tabular}
-	\label{tab:peces}
-\end{table}
-\end{verbatim}
+\subsection{Servidor local y panel de visualización}
+\label{subsec:flask_panel}
 
+El servidor de impresión que se ejecuta en el nodo de borde se implementa sobre Flask \cite{flask}, un \textit{framework} web minimalista escrito en el lenguaje Python. Flask permite exponer servicios HTTP con una huella de recursos reducida y sin la complejidad de un servidor de aplicaciones completo, lo que lo hace adecuado para un servicio local de propósito específico (recibir el pedido estructurado y comandar la impresora) ejecutándose sobre el equipo Windows del comercio.
 
-\begin{table}[h]
-	\centering
-	\caption[caption corto]{caption largo más descriptivo.}
-	\begin{tabular}{l c c}    
-		\toprule
-		\textbf{Especie} 	 & \textbf{Tamaño} 		& \textbf{Valor}  \\
-		\midrule
-		Amphiprion Ocellaris & 10 cm 				& \$ 6.000 \\		
-		Hepatus Blue Tang	 & 15 cm				& \$ 7.000 \\
-		Zebrasoma Xanthurus	 & 12 cm				& \$ 6.800 \\
-		\bottomrule
-		\hline
-	\end{tabular}
-	\label{tab:peces}
-\end{table}
-
-En cada capítulo se debe reiniciar el número de conteo de las figuras y las tablas, por ejemplo, figura 2.1 o tabla 2.1, pero no se debe reiniciar el conteo en cada sección. Por suerte la plantilla se encarga de esto por nosotros.
-
-\subsection{Ecuaciones}
-\label{sec:Ecuaciones}
-
-Al insertar ecuaciones en la memoria dentro de un entorno \textit{equation}, éstas se numeran en forma automática  y se pueden referir al igual que como se hace con las figuras y tablas, por ejemplo ver la ecuación \ref{eq:metric}.
-
-\begin{equation}
-	\label{eq:metric}
-	ds^2 = c^2 dt^2 \left( \frac{d\sigma^2}{1-k\sigma^2} + \sigma^2\left[ d\theta^2 + \sin^2\theta d\phi^2 \right] \right)
-\end{equation}
-                                                        
-Para generar la ecuación \ref{eq:metric} se utilizó el siguiente código:
-
-\begin{verbatim}
-\begin{equation}
-	\label{eq:metric}
-	ds^2 = c^2 dt^2 \left( \frac{d\sigma^2}{1-k\sigma^2} + 
-	\sigma^2\left[ d\theta^2 + 
-	\sin^2\theta d\phi^2 \right] \right)
-\end{equation}
-\end{verbatim}
+La visualización de los pedidos, el historial y las métricas de operación se ofrece a través de un panel web alojado en el VPS y accesible desde cualquier navegador moderno, sin necesidad de instalar aplicaciones adicionales en los dispositivos del comercio.
+% [PENDIENTE: confirmar la tecnología del panel web (framework de frontend, o si se
+% sirve directamente desde el backend) y el mecanismo de actualización en tiempo real.]
