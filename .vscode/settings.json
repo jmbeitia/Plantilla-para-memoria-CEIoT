@@ -1,0 +1,9 @@
+{
+  // Usar latexmk (respeta el .latexmkrc del repo)
+  "latex-workshop.latex.recipe.default": "latexmk",
+  // Recompilar al guardar, como el Recompile de Overleaf
+  "latex-workshop.latex.autoBuild.run": "onSave",
+  // Limpiar auxiliares al cerrar, dejando solo el PDF
+  "latex-workshop.latex.autoClean.run": "onBuilt",
+  "latex-workshop.latex.clean.subfolder.enabled": true
+}

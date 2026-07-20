@@ -1,0 +1,18 @@
+# Auxiliares de compilacion LaTeX
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.run.xml
+*-blx.bib
+build/
+
+
+.DS_Store
