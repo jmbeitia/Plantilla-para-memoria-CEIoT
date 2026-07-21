@@ -1,153 +1,11 @@
-@ARTICLE{ARTICLE:1,
-    AUTHOR="John Doe",
-    TITLE="Title",
-    JOURNAL="Journal",
-    YEAR="2017",
-}
-
-@BOOK{BOOK:1,
-    AUTHOR="John Doe",
-    TITLE="The Book without Title",
-    PUBLISHER="Dummy Publisher",
-    YEAR="2100",
-}
-
-@INBOOK{BOOK:2,
-    AUTHOR="John Doe",
-    TITLE="The Book without Title",
-    PUBLISHER="Dummy Publisher",
-    YEAR="2100",
-    PAGES="100-200",
-}
-
-@MISC{WEBSITE:1,
-	HOWPUBLISHED = "\url{http://example.com}",
-	AUTHOR = "Intel",
-	TITLE = "Example Website",
-	MONTH = "12",
-	YEAR = "1988",
-	URLDATE = {2012-11-26}
-}
-
-@MANUAL{dallas:ds18b20,
-    organization  = "Dallas Semiconductor",
-    title         = "DS18B20 Programmable Resolution 1-Wire Digital Thermometer",
-    number        = "050400",
-    year          =  2015,
-    note          = "Rev. 3"
-}
-
-@book{teton2003,
-	title={Gu{\'\i}a t{\'e}cnica de la acuariofilia},
-	author={Teton, J.},
-	isbn={9788489840249},
-	series={Gu{\'\i}as t{\'e}cnicas},
-	url={https://books.google.com.ar/books?id=6vrjovWkQicC},
-	year={2003},
-	publisher={Tursen S.A. - H. Blume}
-}
-
-@book{IEEE:citation,
-	author={IEEE},
-	title={IEEE Citation Reference},
-	edition={1},
-	url={http://www.ieee.org/documents/ieeecitationref.pdf},
-	urldate={2016-9-26},
-	publisher={IEEE Publications},
-	year={2016}
-}
-
-@misc{CIAA,
-	author = {{Proyecto CIAA}},
-	title = {Computadora Industrial Abierta Argentina},
-	url = {http://proyecto-ciaa.com.ar/devwiki/doku.php?id=start},
-	note = {Visitado el 2016-06-25},
-	year = {2014}
-}
-
-@MISC{lpcopen,
-   author =	{{NXP Semiconductors}},
-   title =	{LPCOPEN v2.16 Drivers, Middleware and Examples},
-   url =	{http://www.nxp.com/products/microcontrollers-and-processors/arm-processors/lpc-cortex-m-mcus/software-tools/lpcopen-libraries-and-examples:LPC-OPEN-LIBRARIES},
-   note =	{Disponible: 2016-06-25},
- }
- 
-@MISC{contrib,
-	author =	{{Savannah}},
-	title =	{lwIP - A Lightweight TCP/IP stack},
-	url =	{http://git.savannah.gnu.org/cgit/lwip/lwip-contrib.git},
-	note =	{Disponible: 2016-06-25},
- }
-
-@MISC{webserver,
-	author =	{{Savannah}},
-	title =	{lwIP - Wiki - Sample Web Server},
-	url =	{ http://lwip.wikia.com/wiki/Sample_Web_Server},
-	note =	{Disponible: 2016-06-25}
- } 
- 
-
-
-@MISC{sensor_pH,
-   author =	{dfRobot},
-   title =	{PH meter(SKU: SEN0161)},
-   url =	{http://www.dfrobot.com/wiki/index.php?title=PH_meter(SKU:_SEN0161)},
-   note =	{Disponible: 2016-06-25},
-}
-
-@misc{rfc2616,
-	series =	{Request for Comments},
-	number=		2616,
-	howpublished=	{RFC 2616},
-	publisher =	{RFC Editor},
-	doi =		{10.17487/rfc2616},
-	url =		{https://rfc-editor.org/rfc/rfc2616.txt},
-	author=		{Jeffrey Mogul and Larry M Masinter and Roy T. Fielding and Jim Gettys and Paul J. Leach and Tim Berners-Lee},
-	title=		{{Hypertext Transfer Protocol -- HTTP/1.1}},
-	pagetotal =	176,
-	year =		2013,
-	month =		3,
-	day =		2,
-	abstract =	{HTTP has been in use by the World-Wide Web global information initiative since 1990. This specification defines the protocol referred to as &quot;HTTP/1.1&quot;, and is an update to RFC 2068. [STANDARDS-TRACK]},
-}
-
-@misc{rfc3875,
-	series =	{Request for Comments},
-	number=		3875,
-	howpublished=	{RFC 3875},
-	publisher =	{RFC Editor},
-	doi =		{10.17487/rfc3875},
-	url =		{https://rfc-editor.org/rfc/rfc3875.txt},
-	author=		{David Robinson},
-	title=		{{The Common Gateway Interface (CGI) Version 1.1}},
-	pagetotal =	36,
-	year =		2013,
-	month =		mar,
-	day =		20,
-	abstract =	{The Common Gateway Interface (CGI) is a simple interface for running external programs, software or gateways under an information server in a platform-independent manner. Currently, the supported information servers are HTTP servers.},
-}
-
-@misc{rfc7540,
-	series =	{Request for Comments},
-	number=		7540,
-	howpublished=	{RFC 7540},
-	publisher =	{RFC Editor},
-	doi =		{10.17487/rfc7540},
-	url =		{https://rfc-editor.org/rfc/rfc7540.txt},
-	author=		{Mike Belshe and Roberto Peon and Martin Thomson},
-	title=		{{Hypertext Transfer Protocol Version 2 (HTTP/2)}},
-	pagetotal =	96,
-	year =		2015,
-	month =		nov,
-	day =		18,
-	abstract =	{This specification describes an optimized expression of the semantics of the Hypertext Transfer Protocol (HTTP), referred to as HTTP version 2 (HTTP/2). HTTP/2 enables a more efficient use of network resources and a reduced perception of latency by introducing header field compression and allowing multiple concurrent exchanges on the same connection. It also introduces unsolicited push of representations from servers to clients.},
-}
-
-
-
 %----------------------------------------------------------------------------------------
-% Referencias bibliográficas — Capítulo 1
+% Referencias bibliográficas — memoria completa (capítulos 1 a 5)
+% Formato biblatex (compatible con \printbibliography).
+% Reemplazar el contenido completo de referencias.bib por este archivo.
+% VERIFICAR: ajustar urldate a la fecha real de consulta de cada sitio.
 %----------------------------------------------------------------------------------------
+
+% ---------- Capítulo 1: estado del arte ----------
 
 @article{shi2016edge,
   author  = {Shi, Weisong and Cao, Jie and Zhang, Quan and Li, Youhuizi and Xu, Lanyu},
@@ -216,7 +74,7 @@
 }
 
 % ---------- Capítulo 2: tecnologías de terceros ----------
- 
+
 @online{whatsappbusiness,
   author       = {{Meta}},
   title        = {WhatsApp Business Platform},
@@ -224,7 +82,7 @@
   url          = {https://developers.facebook.com/docs/whatsapp},
   urldate      = {2026-07-06}
 }
- 
+
 @online{cloudflaretunnel,
   author       = {{Cloudflare}},
   title        = {Cloudflare Tunnel},
@@ -232,7 +90,7 @@
   url          = {https://www.cloudflare.com/products/tunnel/},
   urldate      = {2026-07-06}
 }
- 
+
 @online{docker,
   author       = {{Docker}},
   title        = {Docker: Accelerated Container Application Development},
@@ -240,7 +98,7 @@
   url          = {https://www.docker.com},
   urldate      = {2026-07-06}
 }
- 
+
 @online{openai,
   author       = {{OpenAI}},
   title        = {OpenAI Platform},
@@ -248,7 +106,7 @@
   url          = {https://platform.openai.com},
   urldate      = {2026-07-06}
 }
- 
+
 @online{whisper,
   author       = {{OpenAI}},
   title        = {Whisper: Robust Speech Recognition},
@@ -256,7 +114,7 @@
   url          = {https://github.com/openai/whisper},
   urldate      = {2026-07-06}
 }
- 
+
 @online{postgresql,
   author       = {{The PostgreSQL Global Development Group}},
   title        = {PostgreSQL: The World's Most Advanced Open Source Relational Database},
@@ -264,7 +122,7 @@
   url          = {https://www.postgresql.org},
   urldate      = {2026-07-06}
 }
- 
+
 @online{redis,
   author       = {{Redis}},
   title        = {Redis: The Real-time Data Platform},
@@ -272,7 +130,7 @@
   url          = {https://redis.io},
   urldate      = {2026-07-06}
 }
- 
+
 @online{flask,
   author       = {{Pallets}},
   title        = {Flask: Web Development, One Drop at a Time},
@@ -280,7 +138,31 @@
   url          = {https://flask.palletsprojects.com},
   urldate      = {2026-07-06}
 }
- 
+
+@online{escpos,
+  author       = {{Seiko Epson Corporation}},
+  title        = {{ESC/POS} Command Reference for {TM} Printers},
+  organization = {Epson},
+  url          = {https://download4.epson.biz/sec_pubs/pos/reference_en/escpos/index.html},
+  urldate      = {2026-07-20}
+}
+
+@online{windowsserver,
+  author       = {{Microsoft}},
+  title        = {Windows Server},
+  organization = {Microsoft},
+  url          = {https://www.microsoft.com/en-us/windows-server},
+  urldate      = {2026-07-20}
+}
+
+@online{raspberrypi,
+  author       = {{Raspberry Pi Ltd.}},
+  title        = {Raspberry Pi},
+  organization = {Raspberry Pi Ltd.},
+  url          = {https://www.raspberrypi.com},
+  urldate      = {2026-07-20}
+}
+
 @online{hasar181,
   author       = {{Compañía Hasar}},
   title        = {Impresora térmica {P-HAS-181}},
@@ -288,7 +170,7 @@
   url          = {https://compania.grupohasar.com/producto/p-has-181/},
   urldate      = {2026-07-13}
 }
- 
+
 @online{evolutionapi,
   author       = {{Evolution API}},
   title        = {Evolution {API}: Open-source WhatsApp Integration {API}},
@@ -296,7 +178,7 @@
   url          = {https://github.com/EvolutionAPI/evolution-api},
   urldate      = {2026-07-13}
 }
- 
+
 @online{hostinger,
   author       = {{Hostinger}},
   title        = {{VPS} Hosting},
@@ -304,7 +186,7 @@
   url          = {https://www.hostinger.com/vps-hosting},
   urldate      = {2026-07-13}
 }
- 
+
 @online{claude,
   author       = {{Anthropic}},
   title        = {Claude},
@@ -312,3 +194,49 @@
   url          = {https://www.anthropic.com/claude},
   urldate      = {2026-07-13}
 }
+
+@techreport{rfc9110,
+  author      = {Fielding, Roy T. and Nottingham, Mark and Reschke, Julian},
+  title       = {{HTTP} Semantics},
+  type        = {Request for Comments},
+  number      = {9110},
+  institution = {Internet Engineering Task Force},
+  year        = {2022},
+  month       = {6},
+  doi         = {10.17487/RFC9110},
+  url         = {https://www.rfc-editor.org/info/rfc9110},
+  urldate     = {2026-07-20}
+}
+ 
+@phdthesis{fielding2000rest,
+  author = {Fielding, Roy Thomas},
+  title  = {Architectural Styles and the Design of Network-based Software Architectures},
+  school = {University of California, Irvine},
+  year   = {2000}
+}
+ 
+@online{openapi31,
+  author       = {{OpenAPI Initiative}},
+  title        = {{OpenAPI} Specification v3.1.0},
+  organization = {OpenAPI Initiative},
+  year         = {2021},
+  url          = {https://spec.openapis.org/oas/v3.1.0.html},
+  urldate      = {2026-07-20}
+}
+
+@online{angular,
+  author       = {{Google}},
+  title        = {Angular},
+  organization = {Google},
+  url          = {https://angular.dev},
+  urldate      = {2026-07-20}
+}
+ 
+@online{chartjs,
+  author       = {{Chart.js}},
+  title        = {Chart.js: Simple yet flexible JavaScript charting library},
+  organization = {Chart.js},
+  url          = {https://www.chartjs.org},
+  urldate      = {2026-07-20}
+}
+ 
