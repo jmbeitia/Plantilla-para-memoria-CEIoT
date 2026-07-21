@@ -50,6 +50,29 @@
 }
 
 
+% Último recurso de TeX para ajustar líneas rebeldes estirando los espacios,
+% en lugar de desbordar el margen (solo actúa cuando no hay otra solución)
+\setlength{\emergencystretch}{3em}
+
+% Permitir que biblatex corte las URLs largas de la bibliografía
+% (por defecto solo corta tras "//", lo que desborda el margen)
+\setcounter{biburlnumpenalty}{9000}
+\setcounter{biburlucpenalty}{9000}
+\setcounter{biburllcpenalty}{9000}
+
+% Estilo global de los bloques de código (listings)
+\lstset{
+    basicstyle=\small\ttfamily, % Un cuerpo menor que el texto: entran ~65 caracteres por línea
+    breaklines=true,            % Corta las líneas largas en vez de desbordar el margen
+    breakatwhitespace=true,     % Prefiere cortar en un espacio, no en mitad de una palabra
+    breakindent=1em,            % Sangría de la continuación de una línea cortada
+    keepspaces=true,            % Conserva la indentación original del código
+    showstringspaces=false,     % No marca los espacios dentro de las cadenas
+    captionpos=b,               % Epígrafe debajo del bloque
+    aboveskip=1em,
+    belowskip=1em
+}
+
 % Definir comandos requeridos por la clase
 \newcommand{\degreename}{Maestría en Ciencias} % Cambia según tu título
 \newcommand{\univname}{Universidad Nacional de Ejemplo} % Cambia según tu universidad
