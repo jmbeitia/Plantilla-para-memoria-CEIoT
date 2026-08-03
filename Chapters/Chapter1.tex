@@ -60,7 +60,7 @@ El trabajo se desarrolló para la Tienda de frutas Luján, un comercio minorista
 
 Este proceso manual presenta varias limitaciones. En primer lugar, consume tiempo del personal que podría destinarse a la atención y a la preparación de los pedidos, y su capacidad se satura en los horarios de mayor demanda. En segundo lugar, la transcripción manual es propensa a errores de interpretación, especialmente ante mensajes de voz extensos, listas manuscritas poco legibles o denominaciones ambiguas de un mismo producto. En tercer lugar, al no existir un registro estructurado de los pedidos, se pierde trazabilidad: resulta difícil reconstruir el historial de un cliente, auditar un pedido puntual o extraer información agregada para la gestión comercial.
 
-La motivación del desarrollo es, entonces, doble. Por un lado, se busca reducir los tiempos operativos y los errores humanos automatizando la recepción, la interpretación y la impresión de los pedidos. Por el otro, se procura hacerlo con una solución accesible y de bajo costo, adecuada a la realidad de un comercio que no dispone de infraestructura tecnológica avanzada ni de personal técnico especializado. Esta última condición es la que justifica el enfoque de computación de borde: procesar y actuar localmente permite que la operación crítica (la impresión del ticket para armar el pedido) siga funcionando con baja latencia y sin depender por completo de la disponibilidad de servicios remotos.
+La motivación del desarrollo es, entonces, doble. Por un lado, se busca reducir los tiempos operativos y los errores humanos mediante la automatización de la recepción, interpretación e impresión de los pedidos. Por el otro, se procura hacerlo con una solución accesible y de bajo costo, adecuada a la realidad de un comercio que no dispone de infraestructura tecnológica avanzada ni de personal técnico especializado. Esta última condición es la que justifica el enfoque de computación de borde: procesar y actuar localmente permite que la operación crítica (la impresión del ticket para armar el pedido) funcione con baja latencia y sin depender por completo de la disponibilidad de servicios remotos.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -89,7 +89,7 @@ Frente a los esquemas puramente centralizados, la computación de borde propone 
 \subsection{Comparación y posicionamiento del trabajo}
 \label{subsec:comparacion_arte}
 
-En la tabla \ref{tab:comparacion_arte} se comparan los tres paradigmas descriptos según los criterios más relevantes para el caso de uso abordado. El trabajo desarrollado se posiciona en el enfoque híbrido: delega en la nube las tareas de mayor demanda de cómputo (la interpretación de los mensajes mediante modelos de IA) y ejecuta en el borde la actuación crítica y de baja latencia (la impresión local del pedido), con lo que se busca un compromiso entre costo, personalización y disponibilidad adecuado a un comercio de baja complejidad tecnológica.
+En la tabla \ref{tab:comparacion_arte} se comparan los tres paradigmas descriptos según los criterios más relevantes para el caso de uso abordado. El trabajo desarrollado se posiciona en el enfoque híbrido. En la nube se ejecutan las tareas de mayor demanda de cómputo, como la interpretación de los mensajes mediante modelos de IA. En el borde se ejecuta la actuación crítica y de baja latencia, es decir, la impresión local del pedido. De este modo, se busca un compromiso entre costo, personalización y disponibilidad, adecuado a un comercio de baja complejidad tecnológica.
 
 \begin{table}[h]
 	\centering
@@ -121,9 +121,9 @@ Para alcanzarlo, se definieron los siguientes objetivos específicos, formulados
 
 \begin{itemize}
 	\item Capturar de forma automática los pedidos entrantes por el canal de mensajería, en sus distintos formatos: texto, voz e imagen.
-	\item Interpretar el contenido de cada pedido mediante modelos de inteligencia artificial, identificando productos, cantidades y unidades, y normalizando denominaciones equivalentes de un mismo producto.
+	\item Interpretar el contenido de cada pedido mediante modelos de inteligencia artificial, para identificar productos, cantidades y unidades, y normalizar denominaciones equivalentes de un mismo producto.
 	\item Generar, a partir de esa interpretación, un pedido en formato estructurado y persistirlo de manera que quede registrada la trazabilidad completa, desde la recepción hasta la impresión.
-	\item Imprimir automáticamente el pedido en una impresora térmica conectada a un servidor local, garantizando la actuación en el borde con baja latencia.
+	\item Imprimir automáticamente el pedido en una impresora térmica conectada a un servidor local, para garantizar la actuación en el borde con baja latencia.
 	\item Establecer una comunicación segura entre el servidor local y los servicios en la nube.
 	\item Proveer un panel web que permita visualizar los pedidos en tiempo real, el historial y métricas básicas de operación.
 	\item Validar el sistema en condiciones reales de operación en el comercio.
