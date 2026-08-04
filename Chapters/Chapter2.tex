@@ -20,8 +20,6 @@ El nodo de borde del sistema está constituido por un servidor local instalado e
 \label{subsec:servidor_local}
 
 Como servidor local se utiliza una computadora con sistema operativo Windows Server 2019 \cite{windowsserver}, propiedad del cliente y preexistente en el local. Sobre este equipo se ejecutan el servidor de impresión y el cliente del túnel seguro hacia la nube.
-% [PENDIENTE: si se conocen, agregar las características básicas del equipo
-% (procesador, memoria).]
 
 Se evaluaron dos alternativas para el nodo de borde. La primera consistió en incorporar una computadora de placa única (SBC, del inglés \textit{Single Board Computer}) dedicada, como una Raspberry Pi \cite{raspberrypi}. La segunda consistió en reutilizar el equipo ya disponible en el comercio. Se optó por la segunda opción por tres motivos. El primero fue el costo, dado que reutilizar el hardware disponible elimina la inversión marginal en equipamiento. El segundo fue la operación, ya que el equipo permanece encendido durante el horario comercial y resulta conocido por el personal, lo que simplifica la instalación y el mantenimiento. El tercero fue la compatibilidad, porque la impresora provee controladores para Windows y su integración no requirió desarrollos de bajo nivel.
 
@@ -50,7 +48,7 @@ El intercambio de mensajes entre los componentes se realiza mediante HTTP \cite{
 \subsection{Canal de mensajería}
 \label{subsec:whatsapp}
 
-La vinculación con WhatsApp se realiza mediante Evolution API \cite{evolutionapi}, una pasarela de mensajería de código abierto que expone las funciones de la plataforma a través de una interfaz REST y de notificaciones automáticas. Evolution API admite dos modos de conexión. El primero se basa en el protocolo de WhatsApp Web, mediante la biblioteca Baileys \cite{baileys}, y no requiere verificación comercial ante Meta. El segundo se basa en la API oficial WhatsApp Business Cloud \cite{whatsappbusiness}. En este trabajo se utiliza el primer modo. Ante cada mensaje entrante, de texto, voz o imagen, la pasarela emite una notificación con el contenido o con las referencias para descargarlo.
+La vinculación con WhatsApp \cite{whatsapp} se realiza mediante Evolution API \cite{evolutionapi}, una pasarela de mensajería de código abierto que expone las funciones de la plataforma a través de una interfaz REST y de notificaciones automáticas. Evolution API admite dos modos de conexión. El primero se basa en el protocolo de WhatsApp Web, mediante la biblioteca Baileys \cite{baileys}, y no requiere verificación comercial ante Meta. El segundo se basa en la API oficial WhatsApp Business Cloud \cite{whatsappbusiness}. En este trabajo se utiliza el primer modo. Ante cada mensaje entrante, de texto, voz o imagen, la pasarela emite una notificación con el contenido o con las referencias para descargarlo.
 
 La elección de Evolution API para la etapa inicial del trabajo se fundamentó en su costo nulo, en su rapidez de puesta en marcha (no requiere verificación comercial ni aprobación de plantillas) y en su despliegue autoalojado, coherente con la infraestructura del sistema. Su principal limitación es que el modo basado en WhatsApp Web constituye un mecanismo no oficial, con posibles restricciones de estabilidad y cumplimiento. Por ese motivo, el sistema se diseñó compatible con la API oficial de WhatsApp Business, y la migración prevista no implica modificaciones estructurales en los flujos de procesamiento.
 
@@ -106,7 +104,7 @@ La decisión de consumir estos modelos como servicio, en lugar de ejecutarlos so
 \section{Herramientas de almacenamiento y visualización}
 \label{sec:almacenamiento_visualizacion}
 
-En esta sección se presentan las herramientas de persistencia de datos y los componentes destinados a la visualización de la operación. Las bases de datos que sostienen la información del sistema y el servidor local junto con el panel web de control.
+En esta sección se presentan las herramientas de persistencia de datos y los componentes destinados a la visualización de la operación, que comprenden las bases de datos que sostienen la información del sistema y el servidor local junto con el panel web de control.
 
 \subsection{Bases de datos}
 \label{subsec:bases_datos}
@@ -118,6 +116,6 @@ De manera complementaria se emplea Redis \cite{redis}, una base de datos en memo
 \subsection{Servidor local y panel de visualización}
 \label{subsec:flask_panel}
 
-El servidor de impresión que se ejecuta en el nodo de borde se implementó sobre Flask \cite{flask}, un entorno de desarrollo web minimalista escrito en el lenguaje Python. Flask permite exponer servicios HTTP con una huella de recursos reducida y sin la complejidad de un servidor de aplicaciones completo. Resulta adecuado para un servicio local de propósito específico, que recibe el pedido estructurado y comanda la impresora sobre el equipo Windows del comercio.
+El servidor de impresión que se ejecuta en el nodo de borde se implementó sobre Flask \cite{flask}, un entorno de desarrollo web minimalista escrito en el lenguaje Python \cite{python}. Flask permite exponer servicios HTTP con una huella de recursos reducida y sin la complejidad de un servidor de aplicaciones completo. Resulta adecuado para un servicio local de propósito específico, que recibe el pedido estructurado y comanda la impresora sobre el equipo Windows del comercio.
 
 La visualización de los pedidos, del historial y de las métricas de operación se ofrece a través de un panel web alojado en el VPS, accesible desde cualquier navegador moderno. Este enfoque evita la instalación de aplicaciones adicionales en los dispositivos del comercio. El panel se desarrolló con Angular \cite{angular}, un entorno de desarrollo de aplicaciones web mantenido por Google, junto con la biblioteca de componentes Angular Material. La representación de las métricas se resuelve con Chart.js \cite{chartjs}. La elección de un entorno estructurado, con tipado estático y organización por componentes, respondió a la necesidad de sostener el crecimiento del panel a medida que se incorporan nuevas vistas y funciones de administración.

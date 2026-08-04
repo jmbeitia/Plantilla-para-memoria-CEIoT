@@ -27,7 +27,7 @@ El sistema se organizó en tres capas funcionales. La capa de captura y comunica
 
 El criterio rector del diseño fue asignar cada tarea al lugar de ejecución que mejor equilibra latencia, disponibilidad y costo. Las tareas de mayor demanda de procesamiento son la transcripción de voz, la lectura de imágenes y la estructuración mediante modelos de lenguaje. Todas ellas se delegaron a servicios en la nube, donde la capacidad de cómputo resulta elástica y los modelos se consumen bajo demanda. Ejecutarlas sobre el equipo del comercio habría exigido una inversión en hardware incompatible con las restricciones económicas del trabajo.
 
-La actuación crítica del negocio es la impresión del ticket que habilita el armado del pedido. Esa tarea se resolvió en el borde, sobre el servidor local del comercio. La decisión responde a tres motivos. El primero es la latencia: la orden de impresión recorre un único salto desde el servidor local hasta la impresora. El segundo es la independencia del canal: la impresora nunca se expone a Internet, sino que queda detrás de un servicio local que actúa como intermediario. El tercero es la continuidad operativa: el personal puede reimprimir un pedido ya recibido desde el panel sin que intervengan los modelos de inteligencia artificial.
+La actuación crítica del negocio es la impresión del ticket que habilita el armado del pedido. Esa tarea se resolvió en el borde, sobre el servidor local del comercio. La decisión responde a tres motivos. El primero es la latencia, ya que la orden de impresión recorre un único salto desde el servidor local hasta la impresora. El segundo es la independencia del canal, dado que la impresora nunca se expone a Internet, sino que queda detrás de un servicio local que actúa como intermediario. El tercero es la continuidad operativa, porque el personal puede reimprimir un pedido ya recibido desde el panel sin que intervengan los modelos de inteligencia artificial.
 
 \subsection{Organización del código}
 \label{subsec:organizacion_codigo}
@@ -35,7 +35,7 @@ La actuación crítica del negocio es la impresión del ticket que habilita el a
 El código fuente se organizó en cuatro módulos independientes, que se corresponden con los componentes de la arquitectura:
 
 \begin{itemize}
-  \item \code{api/}: la interfaz de programación de aplicaciones (API) y la lógica de pedidos, implementadas con Node.js, Express y TypeScript sobre el mapeador objeto-relacional (ORM, del inglés \textit{Object-Relational Mapping}) Prisma.
+  \item \code{api/}: la interfaz de programación de aplicaciones (API) y la lógica de pedidos, implementadas con Node.js \cite{nodejs}, Express \cite{express} y TypeScript \cite{typescript} sobre el mapeador objeto-relacional (ORM, del inglés \textit{Object-Relational Mapping}) Prisma \cite{prisma}.
   \item \code{web/panel/}: el panel web de control, desarrollado con Angular.
   \item \code{n8n/}: los flujos de automatización que orquestan la recepción y la interpretación de los pedidos.
   \item \code{print\_server/}: el servidor de impresión que se ejecuta en el nodo de borde, implementado con Flask.
@@ -127,7 +127,7 @@ La conectividad del sistema comprende tres tramos con características distintas
 
 El primero es el tramo de entrada. La pasarela Evolution API, alojada en el servidor virtual, mantiene la vinculación con la red de WhatsApp y notifica cada mensaje al flujo de n8n mediante peticiones HTTPS, la variante cifrada de HTTP.
 
-El segundo es el tramo interno de la nube. Los servicios contenerizados se comunican entre sí dentro del mismo servidor. El flujo de n8n consulta el catálogo a la API, esta accede a PostgreSQL, mientras que el panel web consume los mismos recursos expuestos por dicha interfaz. Junto a estos servicios opera Chatwoot, una plataforma de gestión de conversaciones que centraliza la bandeja de entrada de WhatsApp. Su integración permite que el personal acceda desde el panel al hilo original de la conversación que dio origen a un pedido, lo que resulta útil ante una interpretación dudosa.
+El segundo es el tramo interno de la nube. Los servicios contenerizados se comunican entre sí dentro del mismo servidor. El flujo de n8n consulta el catálogo a la API, esta accede a PostgreSQL, mientras que el panel web consume los mismos recursos expuestos por dicha interfaz. Junto a estos servicios opera Chatwoot \cite{chatwoot}, una plataforma de gestión de conversaciones que centraliza la bandeja de entrada de WhatsApp. Su integración permite que el personal acceda desde el panel al hilo original de la conversación que dio origen a un pedido, lo que resulta útil ante una interpretación dudosa.
 
 El tercero es el tramo entre la nube y el borde, resuelto mediante el túnel de Cloudflare que se describe en la sección siguiente.
 
@@ -311,7 +311,7 @@ El ticket es la salida física del sistema y el insumo directo para el armado de
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.45\textwidth]{Figures/ticket_impreso.jpeg}
+  \includegraphics[width=0.45\textwidth]{Figures/ticket_impreso.png}
   \caption{Ticket generado por el sistema e impreso en el comercio.}
   \label{fig:ticket}
 \end{figure}
