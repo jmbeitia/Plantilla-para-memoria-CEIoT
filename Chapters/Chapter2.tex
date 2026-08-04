@@ -34,7 +34,7 @@ También se descartó el uso de un microcontrolador. Un dispositivo de este tipo
 \subsection{Impresora térmica}
 \label{subsec:impresora}
 
-Para la impresión de los tickets se utiliza una impresora térmica Hasar P-HAS-181 \cite{hasar181}, un modelo de tipo comandera del fabricante argentino Grupo Hasar, orientado al punto de venta. La impresora imprime por cabezal térmico directo sobre rollos de papel de 80 mm de ancho, con corte automático de papel y resolución de 203 dpi (del inglés, \textit{dots per inch}, puntos por pulgada). Admite la impresión de códigos de barras y códigos QR (del inglés, \textit{Quick Response}). Dispone de tres interfaces de conexión (puerto serie, USB y Ethernet) y de controladores para Windows. Sus comandos de impresión resultan compatibles con ESC/POS \cite{escpos}, el conjunto de instrucciones definido por Epson que constituye el estándar de facto del sector.
+Para la impresión de los tickets se utiliza una impresora térmica Hasar P-HAS-181 \cite{hasar181}, un modelo de tipo comandera del fabricante argentino Grupo Hasar, orientado al punto de venta. La impresora imprime por cabezal térmico directo sobre rollos de papel de 80 mm de ancho y dispone de tres interfaces de conexión (puerto serie, USB y Ethernet) y de controladores para Windows. Sus comandos de impresión resultan compatibles con ESC/POS \cite{escpos}, el conjunto de instrucciones definido por Epson que constituye el estándar de facto del sector.
 
 En la instalación actual, la impresora se conecta al servidor local por USB. La disponibilidad de una interfaz Ethernet fue, sin embargo, un criterio de selección. El equipo puede requerir un cambio de ubicación dentro del comercio, por ejemplo hacia el sector de armado de pedidos. La conexión por red permitiría ese traslado sin dependencia de la proximidad física con el servidor.
 
@@ -47,16 +47,16 @@ La elección de este modelo se fundamentó en cuatro factores. Primero, la impre
 \section{Protocolos de comunicación}
 \label{sec:protocolos}
 
-La comunicación del sistema no se apoya en los protocolos habituales de las redes de sensores, como MQTT o LoRaWAN, sino en protocolos y servicios de la web. El intercambio de mensajes entre los distintos componentes se realiza mediante HTTP (del inglés, \textit{Hypertext Transfer Protocol}), un protocolo de nivel de aplicación basado en peticiones y respuestas, definido en el estándar RFC 9110 \cite{rfc9110}. Las interfaces expuestas siguen el estilo arquitectónico REST (del inglés, \textit{Representational State Transfer}), formulado por Fielding \cite{fielding2000rest}, que organiza la comunicación alrededor de recursos identificados por direcciones y operaciones uniformes sobre ellos.
+El intercambio de mensajes entre los distintos componentes se realiza mediante HTTP (del inglés, \textit{Hypertext Transfer Protocol}), un protocolo de nivel de aplicación basado en peticiones y respuestas, definido en el estándar RFC 9110 \cite{rfc9110}. Las interfaces expuestas siguen el estilo arquitectónico REST (del inglés, \textit{Representational State Transfer}), formulado por Fielding \cite{fielding2000rest}, que organiza la comunicación alrededor de recursos identificados por direcciones y operaciones uniformes sobre ellos.
 
 Esta elección responde a que todos los servicios involucrados exponen sus funcionalidades a través de interfaces de programación de aplicaciones (API, del inglés \textit{Application Programming Interface}) basadas en HTTP. Para los eventos asincrónicos, como la llegada de un mensaje, se emplea el mecanismo de notificaciones automáticas (\textit{webhooks}), incorporado como elemento de primer nivel en la versión 3.1 de la especificación OpenAPI \cite{openapi31}. Este mecanismo invierte el sentido habitual de la comunicación: el servicio que origina el evento emite una petición hacia una dirección configurada por el sistema receptor, sin que este último deba consultar de forma periódica por novedades.
 
 \subsection{Canal de mensajería}
 \label{subsec:whatsapp}
 
-La vinculación con WhatsApp se realiza mediante Evolution API \cite{evolutionapi}, una pasarela de mensajería de código abierto que expone las funciones de la plataforma a través de una interfaz REST y de notificaciones automáticas. Evolution API admite dos modos de conexión. El primero se basa en el protocolo de WhatsApp Web, mediante la biblioteca Baileys, y no requiere verificación comercial ante Meta. El segundo se basa en la API oficial WhatsApp Business Cloud \cite{whatsappbusiness}. En este trabajo se utiliza el primer modo. Ante cada mensaje entrante, de texto, voz o imagen, la pasarela emite una notificación con el contenido o con las referencias para descargarlo.
+La vinculación con WhatsApp se realiza mediante Evolution API \cite{evolutionapi}, una pasarela de mensajería de código abierto que expone las funciones de la plataforma a través de una interfaz REST y de notificaciones automáticas. Evolution API admite dos modos de conexión. El primero se basa en el protocolo de WhatsApp Web, mediante la biblioteca Baileys \cite{baileys}, y no requiere verificación comercial ante Meta. El segundo se basa en la API oficial WhatsApp Business Cloud \cite{whatsappbusiness}. En este trabajo se utiliza el primer modo. Ante cada mensaje entrante, de texto, voz o imagen, la pasarela emite una notificación con el contenido o con las referencias para descargarlo.
 
-La elección de Evolution API para la etapa inicial del proyecto se fundamentó en tres razones: su costo nulo, la rapidez de puesta en marcha (no requiere el proceso de verificación comercial ni la aprobación de plantillas de la API oficial) y su despliegue autoalojado, coherente con la infraestructura contenerizada del sistema. Su principal limitación reside en que el modo basado en WhatsApp Web constituye un mecanismo no oficial, con posibles restricciones de estabilidad y de cumplimiento frente a la alternativa provista por Meta. Por este motivo, el sistema se diseñó de manera compatible con la API de WhatsApp Business y se encuentra prevista la migración a la vía oficial. Esta compatibilidad se estableció como requerimiento de interoperabilidad desde la planificación del proyecto, de modo que el cambio no implica modificaciones estructurales en los flujos de procesamiento.
+La elección de Evolution API para la etapa inicial del trabajo se fundamentó en tres razones: su costo nulo, la rapidez de puesta en marcha (no requiere el proceso de verificación comercial ni la aprobación de plantillas de la API oficial) y su despliegue autoalojado, coherente con la infraestructura contenerizada del sistema. Su principal limitación reside en que el modo basado en WhatsApp Web constituye un mecanismo no oficial, con posibles restricciones de estabilidad y de cumplimiento frente a la alternativa provista por Meta. Por este motivo, el sistema se diseñó de manera compatible con la API de WhatsApp Business y se encuentra prevista la migración a la vía oficial. Esta compatibilidad se estableció como requerimiento de interoperabilidad desde la planificación del trabajo, de modo que el cambio no implica modificaciones estructurales en los flujos de procesamiento.
 
 \subsection{Comunicación segura con la nube}
 \label{subsec:cloudflare}
@@ -71,6 +71,8 @@ Las alternativas consideradas presentaban desventajas claras para este escenario
 
 \section{Plataformas cloud y servicios}
 \label{sec:plataformas_cloud}
+
+En esta sección se describen los servicios en la nube sobre los que se apoya el sistema. La plataforma que orquesta los flujos de procesamiento, la infraestructura donde se despliegan los componentes y los servicios de inteligencia artificial que resuelven la interpretación de los pedidos.
 
 \subsection{Orquestación de flujos de trabajo}
 \label{subsec:n8n}
@@ -127,12 +129,14 @@ La decisión de consumir estos modelos como servicio, en lugar de ejecutarlos so
 \section{Herramientas de almacenamiento y visualización}
 \label{sec:almacenamiento_visualizacion}
 
+En esta sección se presentan las herramientas de persistencia de datos y los componentes destinados a la visualización de la operación. Las bases de datos que sostienen la información del sistema y el servidor local junto con el panel web de control.
+
 \subsection{Bases de datos}
 \label{subsec:bases_datos}
 
 La información de pedidos, clientes y productos se almacena en PostgreSQL \cite{postgresql}, una base de datos relacional de código abierto, madura y ampliamente adoptada. Su modelo relacional con integridad referencial resulta adecuado para el dominio del problema, donde los pedidos se vinculan con clientes y con artículos del catálogo. La trazabilidad exigida al sistema, es decir la reconstrucción del recorrido de cada pedido desde el mensaje original hasta la impresión, requiere garantías de consistencia transaccional. Las consultas estructuradas sobre el historial alimentan además las métricas del panel de control.
 
-De manera complementaria se emplea Redis \cite{redis}, una base de datos en memoria de tipo clave-valor, para la gestión de las sesiones y del estado de los clientes activos durante la recepción de un pedido. Redis ofrece tiempos de acceso muy bajos y expiración automática de claves, características apropiadas para datos de vida corta con alta frecuencia de lectura y escritura. La combinación responde a un criterio de diseño explícito: los datos persistentes y auditables residen solo en la base relacional, mientras que Redis se reserva para información temporal. De este modo, una eventual falla de la capa en memoria no compromete los registros del negocio.
+De manera complementaria se emplea Redis \cite{redis}, una base de datos en memoria de tipo clave-valor, para la gestión de las sesiones y del estado de los clientes activos durante la recepción de un pedido. Redis ofrece tiempos de acceso muy bajos y expiración automática de claves, características apropiadas para datos de carácter transitorio con alta frecuencia de lectura y escritura. La combinación responde a un criterio de diseño explícito: los datos persistentes y auditables residen solo en la base relacional, mientras que Redis se reserva para información temporal. De este modo, una eventual falla de la capa en memoria no compromete los registros del negocio.
 
 \subsection{Servidor local y panel de visualización}
 \label{subsec:flask_panel}

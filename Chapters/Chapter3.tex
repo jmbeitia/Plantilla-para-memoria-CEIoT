@@ -4,7 +4,7 @@
 
 \label{Chapter3} % Para referenciar este capítulo: \ref{Chapter3}
 
-En el presente capítulo se describen el diseño y la implementación del sistema. Se presenta la arquitectura general y la distribución del cómputo entre el comercio y la nube. Luego se detalla cada capa: la captura de los pedidos, la conectividad entre los componentes, el procesamiento y la persistencia, la interfaz de usuario y las medidas de seguridad. En cada sección se exponen los problemas encontrados, los criterios adoptados y la justificación de las decisiones tomadas.
+En el presente capítulo se describen el diseño y la implementación del sistema. Se presenta la arquitectura general y la distribución del cómputo entre el comercio y la nube. Luego se detalla cada capa: la captura de los pedidos, la conectividad entre los componentes, el procesamiento y la persistencia, la interfaz de usuario y las medidas de seguridad. En cada sección se exponen los principales desafíos de diseño, los criterios adoptados y la justificación de las decisiones tomadas.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
@@ -46,9 +46,9 @@ Esta separación permite desplegar, actualizar y probar cada módulo por separad
 \subsection{Entorno de desarrollo}
 \label{subsec:entorno_desarrollo}
 
-El desarrollo planteó una dificultad práctica: la impresora se encuentra en el comercio y permanece en uso durante el horario comercial, por lo que no resultaba viable ensayar contra el equipo real cada modificación del flujo.
+El desarrollo planteó una dificultad práctica, dado que la impresora se encuentra en el comercio y permanece en uso durante el horario comercial, por lo que no resultaba viable ensayar contra el equipo real cada modificación del flujo.
 
-La solución adoptada fue una versión simulada del servidor de impresión. Ese componente expone el mismo recurso y acepta el mismo formato de petición que el servidor real, pero en lugar de enviar el ticket a la impresora lo registra en la consola. El archivo de composición de contenedores del entorno de desarrollo levanta la API, el panel y esa versión simulada, y dirige las peticiones de impresión hacia ella de forma automática.
+La solución adoptada fue una versión simulada del servidor de impresión. Ese componente expone el mismo recurso y acepta el mismo formato de petición que el servidor real, pero en lugar de enviar el ticket a la impresora lo registra en la consola. El archivo de composición de contenedores del entorno de desarrollo inicia la API, el panel y esa versión simulada, y dirige las peticiones de impresión hacia ella de forma automática.
 
 El resultado fue un entorno de desarrollo completo, reproducible en cualquier equipo y sin dependencia del hardware del comercio. La sustitución se resuelve por configuración, sin cambios en el código de la API, lo que garantiza que el componente ejercitado durante las pruebas sea el mismo que opera en producción.
 
@@ -64,14 +64,14 @@ El recorrido de un pedido comprende las siguientes etapas. El cliente envía uno
 \section{Capa de captura y comunicación}
 \label{sec:capa_captura}
 
-Esta capa recibe los mensajes de los clientes y los convierte en un texto único, listo para su interpretación. Constituye la entrada del sistema y concentra buena parte de su complejidad, porque debe absorber la heterogeneidad del canal.
+Esta capa recibe los mensajes de los clientes y los convierte en un texto único, listo para su interpretación. Constituye la entrada del sistema y concentra una parte importante de la complejidad del procesamiento, ya que debe gestionar la diversidad de formatos y tipos de contenido recibidos a través del canal de mensajería.
 
 \subsection{Recepción de los mensajes}
 \label{subsec:recepcion}
 
 La recepción se resolvió mediante el mecanismo de notificaciones automáticas de la pasarela Evolution API. Ante cada mensaje entrante, la pasarela emite una petición HTTP hacia el punto de entrada del flujo de n8n. El primer nodo del flujo normaliza la estructura del mensaje recibido y extrae los datos relevantes: el teléfono del remitente, su nombre de perfil, el identificador del mensaje, el tipo de contenido y la marca temporal.
 
-El teléfono cumple una función central en el diseño, ya que opera como identificador natural del cliente a lo largo de todo el flujo. Se utiliza como clave de agrupación de mensajes, como clave de sesión del agente y como criterio de búsqueda del cliente en la base de datos, donde el campo correspondiente tiene restricción de unicidad. La elección resultó natural para el dominio: el número de teléfono es estable, lo provee el propio canal sin intervención del cliente y no requiere ningún registro previo.
+El teléfono cumple una función central en el diseño, ya que opera como identificador natural del cliente a lo largo de todo el flujo. Se utiliza para agrupar los mensajes, como clave de sesión del agente y como criterio de búsqueda del cliente en la base de datos, donde el campo correspondiente tiene restricción de unicidad. La elección resultó natural para el dominio: el número de teléfono es estable, lo provee el propio canal sin intervención del cliente y no requiere ningún registro previo.
 
 El nombre de perfil de WhatsApp, en cambio, resultó insuficiente para identificar al cliente en el negocio. Muchas personas configuran un apodo o dejan el campo vacío, y el comercio conoce a sus clientes por su nombre real o por su razón social. Por ese motivo, el flujo complementa la identificación con una consulta a la agenda de contactos asociada al comercio, y la base de datos conserva un campo propio con el nombre que el personal administra desde el panel.
 
@@ -87,7 +87,7 @@ Un mismo pedido puede llegar como texto libre, como uno o varios mensajes de voz
   \label{fig:flujo_captura}
 \end{figure}
 
-Los mensajes de texto se emplean de forma directa. Los mensajes de voz y las imágenes requieren un paso previo de descarga: la pasarela entrega el contenido multimedia codificado en base64, que luego se convierte en un archivo binario antes de enviarlo al modelo correspondiente. Los mensajes de voz se transcriben con el servicio de transcripción de OpenAI. Los documentos adjuntos se derivan a una rama específica, que reconoce el formato y extrae su contenido mediante los nodos de extracción de PDF y de planillas de cálculo.
+Los mensajes de texto se emplean de forma directa. Los mensajes de voz y las imágenes requieren un paso previo de descarga. La pasarela entrega el contenido multimedia codificado en base64, que luego se convierte en un archivo binario antes de enviarlo al modelo correspondiente. Los mensajes de voz se transcriben con el servicio de transcripción de OpenAI. Los documentos adjuntos se derivan a una rama específica, que reconoce el formato y extrae su contenido mediante los nodos de extracción de PDF y de planillas de cálculo.
 
 El tratamiento de las imágenes constituye el caso más elaborado. La imagen se envía en paralelo a dos modelos de proveedores distintos, GPT-4o de OpenAI y Claude Sonnet de Anthropic. Ambas lecturas se combinan y se entregan a un tercer modelo, que las compara, corrige las diferencias y devuelve una transcripción única.
 
@@ -100,9 +100,9 @@ El problema más relevante de esta capa no es la interpretación de un mensaje, 
 
 La solución adoptada consiste en un mecanismo de agrupación por ventana temporal, implementado sobre Redis. Cada texto obtenido se agrega al final de una lista cuya clave es el teléfono del cliente. A continuación, el flujo espera un tiempo determinado. Vencido ese plazo, recupera la lista completa, descarta las entradas inválidas, ordena los elementos por su marca temporal y los concatena en un texto único. La lista se elimina luego para dejar la sesión limpia. Los mensajes que llegan durante la espera se acumulan en la misma lista y quedan incluidos en la agrupación, sin disparar un procesamiento adicional.
 
-La elección de Redis para este mecanismo responde a la naturaleza de los datos involucrados. Se trata de información de vida corta, con alta frecuencia de escritura y lectura, cuya pérdida ante una falla no compromete la operación del negocio. La base relacional se reservó para los datos que sí deben persistir y auditarse.
+La elección de Redis para este mecanismo responde a la naturaleza de los datos involucrados. Se trata de información de carácter transitorio, con alta frecuencia de escritura y lectura, cuya pérdida ante una falla no compromete la operación del negocio. La base relacional se reservó para los datos que sí deben persistir y auditarse.
 
-La ventana se fijó en sesenta segundos. El valor no se eligió a partir del comportamiento de los clientes, sino del tiempo de procesamiento del propio sistema: el intervalo entre el ingreso de un mensaje y la finalización de su procesamiento por los agentes resultó cercano al minuto. Una ventana menor habría cerrado la agrupación antes de que los mensajes previos terminaran de procesarse, con el riesgo de fragmentar el pedido. El valor adoptado constituye entonces una cota conservadora, alineada con la latencia observada. La reducción de ese tiempo de procesamiento permitiría acortar la ventana y, con ella, el tiempo total de respuesta del sistema. Esa optimización se plantea como línea de trabajo futuro en el capítulo \ref{Chapter5}.
+La ventana se fijó en sesenta segundos. El valor no se eligió a partir del comportamiento de los clientes, sino del tiempo de procesamiento del propio sistema: el intervalo entre el ingreso de un mensaje y la finalización de su procesamiento por los agentes resultó cercano al minuto. Una ventana menor habría cerrado la agrupación antes de que los mensajes previos terminaran de procesarse, con el riesgo de fragmentar el pedido. El valor adoptado constituye una cota conservadora, alineada con la latencia observada. La reducción de ese tiempo de procesamiento permitiría acortar la ventana y, con ella, el tiempo total de respuesta del sistema. Esa optimización se plantea como línea de trabajo futuro en el capítulo \ref{Chapter5}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -111,7 +111,12 @@ La ventana se fijó en sesenta segundos. El valor no se eligió a partir del com
 \section{Capa de red y comunicaciones}
 \label{sec:capa_red}
 
-En la figura \ref{fig:topologia_despliegue} se presenta la topología de despliegue del sistema, con los servicios contenerizados del servidor virtual y los componentes instalados en el comercio.
+Esta capa resuelve la conectividad entre los componentes del sistema. Se describen los tres tramos de comunicación que la integran, la forma en que se vincula el nodo de borde con la nube y el formato de los mensajes que se intercambian entre los servicios.
+
+\subsection{Tramos de comunicación}
+\label{subsec:tramos}
+
+La conectividad del sistema comprende tres tramos con características distintas. En la figura \ref{fig:topologia_despliegue} se presenta la topología de despliegue, con los servicios contenerizados del servidor virtual y los componentes instalados en el comercio.
 
 \begin{figure}[htbp]
   \centering
@@ -120,16 +125,11 @@ En la figura \ref{fig:topologia_despliegue} se presenta la topología de desplie
   \label{fig:topologia_despliegue}
 \end{figure}
 
-\subsection{Tramos de comunicación}
-\label{subsec:tramos}
-
-La conectividad del sistema comprende tres tramos con características distintas.
-
 El primero es el tramo de entrada. La pasarela Evolution API, alojada en el servidor virtual, mantiene la vinculación con la red de WhatsApp y notifica cada mensaje al flujo de n8n mediante peticiones HTTPS, la variante cifrada de HTTP.
 
-El segundo es el tramo interno de la nube. Los servicios contenerizados se comunican entre sí dentro del mismo servidor: el flujo de n8n consulta el catálogo a la API, la API accede a PostgreSQL, y el panel web consume los mismos recursos de la API que utiliza el flujo. Junto a estos servicios opera Chatwoot, una plataforma de gestión de conversaciones que centraliza la bandeja de entrada de WhatsApp. Su integración permite que el personal acceda desde el panel al hilo original de la conversación que dio origen a un pedido, lo que resulta útil ante una interpretación dudosa.
+El segundo es el tramo interno de la nube. Los servicios contenerizados se comunican entre sí dentro del mismo servidor. El flujo de n8n consulta el catálogo a la API, esta accede a PostgreSQL, mientras que el panel web consume los mismos recursos expuestos por dicha interfaz. Junto a estos servicios opera Chatwoot, una plataforma de gestión de conversaciones que centraliza la bandeja de entrada de WhatsApp. Su integración permite que el personal acceda desde el panel al hilo original de la conversación que dio origen a un pedido, lo que resulta útil ante una interpretación dudosa.
 
-El tercero es el tramo entre la nube y el borde, resuelto mediante el túnel de Cloudflare.
+El tercero es el tramo entre la nube y el borde, resuelto mediante el túnel de Cloudflare que se describe en la sección siguiente.
 
 \subsection{Vinculación con el nodo de borde}
 \label{subsec:tunel}
@@ -143,7 +143,9 @@ Esta elección tiene tres consecuencias prácticas. La instalación no requiere 
 
 Los datos que circulan entre los componentes se serializan en formato JSON (del inglés, \textit{JavaScript Object Notation}). El agente de inteligencia artificial produce una estructura fija, que constituye el contrato interno del sistema. El código \ref{lst:pedido_json} muestra su formato.
 
-\begin{lstlisting}[caption={Estructura del pedido devuelto por el agente de interpretación.}, label={lst:pedido_json}]
+\noindent
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[caption={Estructura del pedido devuelto por el agente de interpretación.}, label={lst:pedido_json}]
 {
   "is_order": true,
   "items": [
@@ -153,12 +155,15 @@ Los datos que circulan entre los componentes se serializan en formato JSON (del 
   "productos_no_encontrados": []
 }
 \end{lstlisting}
+\end{minipage}
 
-El campo \code{is\_order} permite descartar los mensajes que no constituyen un pedido, como saludos o consultas de precio. El campo \code{items} contiene los productos reconocidos, con la denominación exacta del catálogo. El campo \code{aclaraciones} recoge las instrucciones y observaciones del cliente. El campo \code{productos\_no\_\allowbreak encontrados} registra las menciones que no pudieron asociarse a ningún artículo del catálogo, en lugar de descartarlas en silencio. Esta última decisión resultó importante para la trazabilidad: un producto solicitado y no reconocido queda registrado y visible para el personal, en vez de desaparecer del pedido.
+El campo \code{is\_order} permite descartar los mensajes que no constituyen un pedido, como saludos o consultas de precio. El campo \code{items} contiene los productos reconocidos, con la denominación exacta del catálogo. El campo \code{aclaraciones} recoge las instrucciones y observaciones del cliente. El campo \code{productos\_no\_\allowbreak encontrados} registra las menciones que no pudieron asociarse a ningún artículo del catálogo, en lugar de descartarlas sin dejar registro. Esta última decisión resultó importante para la trazabilidad: un producto solicitado y no reconocido queda registrado y visible para el personal, en vez de desaparecer del pedido.
 
 El segundo contrato relevante es el del servidor de impresión. El código \ref{lst:print_json} muestra la petición que la API envía al nodo de borde.
 
-\begin{lstlisting}[caption={Petición de impresión enviada al servidor local.}, label={lst:print_json}]
+\noindent
+\begin{minipage}{\linewidth}
+  \begin{lstlisting}[caption={Petición de impresión enviada al servidor local.}, label={lst:print_json}]
 POST /print
 X-Printer-Token: <token>
 
@@ -169,6 +174,7 @@ X-Printer-Token: <token>
   "text_size": "double_width"
 }
 \end{lstlisting}
+\end{minipage}
 
 El campo \code{text} contiene el ticket ya compuesto. Los campos restantes controlan el destino y el formato de impresión: el nombre de la impresora instalada, el corte automático del papel al finalizar y el tamaño de la tipografía. De manera alternativa, la petición admite una dirección IP y un puerto, para el caso en que la impresora se conecte por red. Esa previsión permite trasladar la impresora dentro del local sin modificar el código, tal como se anticipó en el capítulo \ref{Chapter2}.
 
