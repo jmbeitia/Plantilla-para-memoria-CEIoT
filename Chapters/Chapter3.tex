@@ -25,7 +25,7 @@ El sistema se organizó en tres capas funcionales. La capa de captura y comunica
 \subsection{Criterio de distribución del cómputo}
 \label{subsec:criterio_distribucion}
 
-El criterio rector del diseño fue asignar cada tarea al lugar de ejecución que mejor equilibra latencia, disponibilidad y costo. Las tareas de mayor demanda de procesamiento son la transcripción de voz, la lectura de imágenes y la estructuración mediante modelos de lenguaje. Todas ellas se delegaron a servicios en la nube, donde la capacidad de cómputo resulta elástica y los modelos se consumen bajo demanda. Ejecutarlas sobre el equipo del comercio habría exigido una inversión en hardware incompatible con las restricciones económicas del proyecto.
+El criterio rector del diseño fue asignar cada tarea al lugar de ejecución que mejor equilibra latencia, disponibilidad y costo. Las tareas de mayor demanda de procesamiento son la transcripción de voz, la lectura de imágenes y la estructuración mediante modelos de lenguaje. Todas ellas se delegaron a servicios en la nube, donde la capacidad de cómputo resulta elástica y los modelos se consumen bajo demanda. Ejecutarlas sobre el equipo del comercio habría exigido una inversión en hardware incompatible con las restricciones económicas del trabajo.
 
 La actuación crítica del negocio es la impresión del ticket que habilita el armado del pedido. Esa tarea se resolvió en el borde, sobre el servidor local del comercio. La decisión responde a tres motivos. El primero es la latencia: la orden de impresión recorre un único salto desde el servidor local hasta la impresora. El segundo es la independencia del canal: la impresora nunca se expone a Internet, sino que queda detrás de un servicio local que actúa como intermediario. El tercero es la continuidad operativa: el personal puede reimprimir un pedido ya recibido desde el panel sin que intervengan los modelos de inteligencia artificial.
 
@@ -69,7 +69,7 @@ Esta capa recibe los mensajes de los clientes y los convierte en un texto único
 \subsection{Recepción de los mensajes}
 \label{subsec:recepcion}
 
-La recepción se resolvió mediante el mecanismo de notificaciones automáticas de la pasarela Evolution API. Ante cada mensaje entrante, la pasarela emite una petición HTTP hacia el punto de entrada del flujo de n8n. El primer nodo del flujo normaliza la estructura del mensaje recibido y extrae los datos relevantes: el teléfono del remitente, su nombre de perfil, el identificador del mensaje, el tipo de contenido y la marca temporal.
+La recepción se resolvió mediante el mecanismo de notificaciones automáticas de la pasarela Evolution API. Ante cada mensaje entrante, la pasarela emite una petición HTTP hacia el punto de entrada del flujo de n8n. El primer nodo del flujo normaliza la estructura del mensaje recibido y extrae los datos relevantes como el teléfono del remitente, su nombre de perfil, el identificador del mensaje, el tipo de contenido y la marca temporal.
 
 El teléfono cumple una función central en el diseño, ya que opera como identificador natural del cliente a lo largo de todo el flujo. Se utiliza para agrupar los mensajes, como clave de sesión del agente y como criterio de búsqueda del cliente en la base de datos, donde el campo correspondiente tiene restricción de unicidad. La elección resultó natural para el dominio: el número de teléfono es estable, lo provee el propio canal sin intervención del cliente y no requiere ningún registro previo.
 
@@ -91,7 +91,7 @@ Los mensajes de texto se emplean de forma directa. Los mensajes de voz y las im�
 
 El tratamiento de las imágenes constituye el caso más elaborado. La imagen se envía en paralelo a dos modelos de proveedores distintos, GPT-4o de OpenAI y Claude Sonnet de Anthropic. Ambas lecturas se combinan y se entregan a un tercer modelo, que las compara, corrige las diferencias y devuelve una transcripción única.
 
-La instrucción entregada a los modelos de visión no se limita a transcribir el texto visible. Incorpora reglas del dominio que surgieron de la operación real. La más relevante indica conservar la estructura de las tablas y descartar las filas cuya cantidad pedida sea cero. Esa regla resolvió un caso concreto: algunos clientes mayoristas envían una planilla con el catálogo completo del comercio y completan solo unas pocas filas. Sin esa instrucción, el modelo transcribía el listado íntegro y el agente generaba un pedido con decenas de productos no solicitados.
+La instrucción entregada a los modelos de visión no se limita a transcribir el texto visible. Incorpora reglas del dominio que surgieron de la operación real. La más relevante indica conservar la estructura de las tablas y descartar las filas cuya cantidad pedida sea cero. Esa regla resolvió un caso concreto en que algunos clientes mayoristas envían una planilla con el catálogo completo del comercio y completan solo unas pocas filas. Sin esa instrucción, el modelo transcribía el listado íntegro y el agente generaba un pedido con decenas de productos no solicitados.
 
 \subsection{Agrupación de mensajes fragmentados}
 \label{subsec:agrupacion}
@@ -102,7 +102,7 @@ La solución adoptada consiste en un mecanismo de agrupación por ventana tempor
 
 La elección de Redis para este mecanismo responde a la naturaleza de los datos involucrados. Se trata de información de carácter transitorio, con alta frecuencia de escritura y lectura, cuya pérdida ante una falla no compromete la operación del negocio. La base relacional se reservó para los datos que sí deben persistir y auditarse.
 
-La ventana se fijó en sesenta segundos. El valor no se eligió a partir del comportamiento de los clientes, sino del tiempo de procesamiento del propio sistema: el intervalo entre el ingreso de un mensaje y la finalización de su procesamiento por los agentes resultó cercano al minuto. Una ventana menor habría cerrado la agrupación antes de que los mensajes previos terminaran de procesarse, con el riesgo de fragmentar el pedido. El valor adoptado constituye una cota conservadora, alineada con la latencia observada. La reducción de ese tiempo de procesamiento permitiría acortar la ventana y, con ella, el tiempo total de respuesta del sistema. Esa optimización se plantea como línea de trabajo futuro en el capítulo \ref{Chapter5}.
+La ventana se fijó en sesenta segundos. El valor no se eligió a partir del comportamiento de los clientes, sino del tiempo de procesamiento del propio sistema. El intervalo entre el ingreso de un mensaje y la finalización de su procesamiento por los agentes resultó cercano al minuto. Una ventana menor habría cerrado la agrupación antes de que los mensajes previos terminaran de procesarse, con el riesgo de fragmentar el pedido. El valor adoptado constituye una cota conservadora, alineada con la latencia observada. La reducción de ese tiempo de procesamiento permitiría acortar la ventana y, con ella, el tiempo total de respuesta del sistema. Esa optimización se plantea como línea de trabajo futuro en el capítulo \ref{Chapter5}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -157,7 +157,7 @@ Los datos que circulan entre los componentes se serializan en formato JSON (del 
 \end{lstlisting}
 \end{minipage}
 
-El campo \code{is\_order} permite descartar los mensajes que no constituyen un pedido, como saludos o consultas de precio. El campo \code{items} contiene los productos reconocidos, con la denominación exacta del catálogo. El campo \code{aclaraciones} recoge las instrucciones y observaciones del cliente. El campo \code{productos\_no\_\allowbreak encontrados} registra las menciones que no pudieron asociarse a ningún artículo del catálogo, en lugar de descartarlas sin dejar registro. Esta última decisión resultó importante para la trazabilidad: un producto solicitado y no reconocido queda registrado y visible para el personal, en vez de desaparecer del pedido.
+El campo \code{is\_order} permite descartar los mensajes que no constituyen un pedido, como saludos o consultas de precio. El campo \code{items} contiene los productos reconocidos, con la denominación exacta del catálogo. El campo \code{aclaraciones} recoge las instrucciones y observaciones del cliente. El campo \code{productos\_no\_\allowbreak encontrados} registra las menciones que no pudieron asociarse a ningún artículo del catálogo, en lugar de descartarlas sin dejar registro. Esta última decisión resultó importante para la trazabilidad. Un producto solicitado y no reconocido queda registrado y visible para el personal, en vez de desaparecer del pedido.
 
 El segundo contrato relevante es el del servidor de impresión. El código \ref{lst:print_json} muestra la petición que la API envía al nodo de borde.
 
@@ -192,7 +192,7 @@ Esta capa concentra la interpretación de los pedidos, su validación, la resolu
 \subsection{Interpretación mediante agentes de inteligencia artificial}
 \label{subsec:interpretacion_ia}
 
-La interpretación se implementó como un agente de inteligencia artificial orquestado en n8n. El agente recibe cuatro insumos: el texto agrupado del cliente, sus datos de contacto, el catálogo vigente de productos y la lista de unidades admitidas. Los dos últimos no están fijados en el flujo, sino que se consultan a la API en cada ejecución mediante recursos internos previstos para ese fin. Esta decisión evita la duplicación del catálogo: el personal lo administra desde el panel y el agente siempre opera con la versión actualizada.
+La interpretación se implementó como un agente de inteligencia artificial orquestado en n8n. El agente recibe cuatro insumos: el texto agrupado del cliente, sus datos de contacto, el catálogo vigente de productos y la lista de unidades admitidas. Los dos últimos no están fijados en el flujo, sino que se consultan a la API en cada ejecución mediante recursos internos previstos para ese fin. Esta decisión evita la duplicación del catálogo y el personal lo administra desde el panel. De esta forma, el agente siempre opera con la versión actualizada.
 
 El agente cuenta además con memoria de ventana, cuya clave de sesión se construye a partir del teléfono del cliente. De este modo, cada conversación mantiene su contexto de forma independiente.
 
@@ -255,7 +255,7 @@ La API se organizó por recursos, con un prefijo común y un archivo de rutas po
   \end{tabular}
 \end{table}
 
-La creación de un pedido desde el flujo automático y su creación desde el panel se resolvieron con recursos distintos, aunque compartan la lógica de persistencia. La separación responde a que difieren en su origen, en su mecanismo de autenticación y en la validación aplicada: el flujo entrega productos ya normalizados por el agente, mientras que el panel recibe datos ingresados por una persona.
+La creación de un pedido desde el flujo automático y su creación desde el panel se resolvieron con recursos distintos, aunque compartan la lógica de persistencia. La separación responde a que difieren en su origen, en su mecanismo de autenticación y en la validación aplicada. El flujo entrega productos ya normalizados por el agente, mientras que el panel recibe datos ingresados por una persona.
 
 \subsection{Modelo de datos}
 \label{subsec:modelo_datos}
@@ -311,7 +311,6 @@ El ticket es la salida física del sistema y el insumo directo para el armado de
 
 \begin{figure}[htbp]
   \centering
-  % [PENDIENTE: reemplazar por la fotografía del ticket impreso, con datos de ejemplo.]
   \includegraphics[width=0.45\textwidth]{Figures/ticket_impreso.jpeg}
   \caption{Ticket generado por el sistema e impreso en el comercio.}
   \label{fig:ticket}

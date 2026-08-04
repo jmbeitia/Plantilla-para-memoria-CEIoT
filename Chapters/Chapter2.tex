@@ -23,13 +23,11 @@ Como servidor local se utiliza una computadora con sistema operativo Windows Ser
 % [PENDIENTE: si se conocen, agregar las características básicas del equipo
 % (procesador, memoria).]
 
-Se evaluaron dos alternativas para el nodo de borde. La primera consistió en incorporar una computadora de placa única (SBC, del inglés \textit{Single Board Computer}) dedicada, como una Raspberry Pi \cite{raspberrypi}. La segunda consistió en reutilizar el equipo ya disponible en el comercio. Se optó por la segunda opción a partir de tres criterios.
-
-El primer criterio fue el costo. El trabajo se planteó como una solución económica para un comercio pequeño. La reutilización del hardware disponible elimina la inversión marginal en equipamiento. El segundo criterio fue la operación. El equipo se encuentra en el local, permanece encendido durante el horario comercial y resulta conocido por el personal. Esto simplifica la instalación y el mantenimiento posterior. El tercer criterio fue la compatibilidad. La impresora térmica seleccionada provee controladores para Windows, de modo que la integración no requirió desarrollos adicionales de bajo nivel.
+Se evaluaron dos alternativas para el nodo de borde. La primera consistió en incorporar una computadora de placa única (SBC, del inglés \textit{Single Board Computer}) dedicada, como una Raspberry Pi \cite{raspberrypi}. La segunda consistió en reutilizar el equipo ya disponible en el comercio. Se optó por la segunda opción por tres motivos. El primero fue el costo, dado que reutilizar el hardware disponible elimina la inversión marginal en equipamiento. El segundo fue la operación, ya que el equipo permanece encendido durante el horario comercial y resulta conocido por el personal, lo que simplifica la instalación y el mantenimiento. El tercero fue la compatibilidad, porque la impresora provee controladores para Windows y su integración no requirió desarrollos de bajo nivel.
 
 Como contrapartida, un equipo de propósito general consume más energía que una SBC dedicada y puede verse condicionado por otros usos dentro del comercio. Esta limitación se consideró aceptable frente a la simplicidad operativa obtenida.
 
-También se descartó el uso de un microcontrolador. Un dispositivo de este tipo puede ejecutar funciones simples, como un servidor web básico o la comunicación con periféricos. Sin embargo, el conjunto de responsabilidades del nodo de borde (un servidor web local, el cliente del túnel seguro y la administración de la cola de impresión) se resuelve de manera más conveniente sobre un sistema operativo completo.
+También se descartó el uso de un microcontrolador, ya que el conjunto de responsabilidades del nodo de borde (un servidor web local, el cliente del túnel seguro y la administración de la cola de impresión) se resuelve de manera más conveniente sobre un sistema operativo completo.
 
 \subsection{Impresora térmica}
 \label{subsec:impresora}
@@ -38,7 +36,7 @@ Para la impresión de los tickets se utiliza una impresora térmica Hasar P-HAS-
 
 En la instalación actual, la impresora se conecta al servidor local por USB. La disponibilidad de una interfaz Ethernet fue, sin embargo, un criterio de selección. El equipo puede requerir un cambio de ubicación dentro del comercio, por ejemplo hacia el sector de armado de pedidos. La conexión por red permitiría ese traslado sin dependencia de la proximidad física con el servidor.
 
-La elección de este modelo se fundamentó en cuatro factores. Primero, la impresión térmica es el estándar del comercio minorista por su velocidad y su bajo costo operativo, dado que no utiliza tinta ni cartuchos. Segundo, la compatibilidad con ESC/POS permite comandar el equipo desde bibliotecas de software ampliamente disponibles, sin dependencia de un protocolo propietario. Tercero, la disponibilidad de controladores para Windows garantiza la integración directa con el servidor local. Cuarto, se trata de un fabricante nacional con presencia establecida en el mercado argentino, lo que asegura la provisión local de insumos, repuestos y servicio técnico. Este último criterio resulta relevante para un comercio sin personal técnico propio.
+La elección de este modelo se fundamentó en cuatro factores. La impresión térmica es el estándar del comercio minorista por su velocidad y su bajo costo operativo, al no utilizar tinta ni cartuchos. La compatibilidad con ESC/POS permite comandar el equipo desde bibliotecas ampliamente disponibles, sin depender de un protocolo propietario. Los controladores para Windows garantizan la integración directa con el servidor local. Por último, se trata de un fabricante nacional, lo que asegura la provisión local de insumos, repuestos y servicio técnico, un criterio relevante para un comercio sin personal técnico propio.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -47,23 +45,21 @@ La elección de este modelo se fundamentó en cuatro factores. Primero, la impre
 \section{Protocolos de comunicación}
 \label{sec:protocolos}
 
-El intercambio de mensajes entre los distintos componentes se realiza mediante HTTP (del inglés, \textit{Hypertext Transfer Protocol}), un protocolo de nivel de aplicación basado en peticiones y respuestas, definido en el estándar RFC 9110 \cite{rfc9110}. Las interfaces expuestas siguen el estilo arquitectónico REST (del inglés, \textit{Representational State Transfer}), formulado por Fielding \cite{fielding2000rest}, que organiza la comunicación alrededor de recursos identificados por direcciones y operaciones uniformes sobre ellos.
-
-Esta elección responde a que todos los servicios involucrados exponen sus funcionalidades a través de interfaces de programación de aplicaciones (API, del inglés \textit{Application Programming Interface}) basadas en HTTP. Para los eventos asincrónicos, como la llegada de un mensaje, se emplea el mecanismo de notificaciones automáticas (\textit{webhooks}), incorporado como elemento de primer nivel en la versión 3.1 de la especificación OpenAPI \cite{openapi31}. Este mecanismo invierte el sentido habitual de la comunicación: el servicio que origina el evento emite una petición hacia una dirección configurada por el sistema receptor, sin que este último deba consultar de forma periódica por novedades.
+El intercambio de mensajes entre los componentes se realiza mediante HTTP \cite{rfc9110}, con interfaces que siguen el estilo arquitectónico REST \cite{fielding2000rest}. La elección responde a que todos los servicios involucrados exponen sus funcionalidades a través de interfaces de programación de aplicaciones (API, del inglés \textit{Application Programming Interface}) basadas en HTTP. Para los eventos asincrónicos, como la llegada de un mensaje, se emplean notificaciones automáticas (\textit{webhooks}), que evitan que el sistema receptor deba consultar de forma periódica por novedades.
 
 \subsection{Canal de mensajería}
 \label{subsec:whatsapp}
 
 La vinculación con WhatsApp se realiza mediante Evolution API \cite{evolutionapi}, una pasarela de mensajería de código abierto que expone las funciones de la plataforma a través de una interfaz REST y de notificaciones automáticas. Evolution API admite dos modos de conexión. El primero se basa en el protocolo de WhatsApp Web, mediante la biblioteca Baileys \cite{baileys}, y no requiere verificación comercial ante Meta. El segundo se basa en la API oficial WhatsApp Business Cloud \cite{whatsappbusiness}. En este trabajo se utiliza el primer modo. Ante cada mensaje entrante, de texto, voz o imagen, la pasarela emite una notificación con el contenido o con las referencias para descargarlo.
 
-La elección de Evolution API para la etapa inicial del trabajo se fundamentó en tres razones: su costo nulo, la rapidez de puesta en marcha (no requiere el proceso de verificación comercial ni la aprobación de plantillas de la API oficial) y su despliegue autoalojado, coherente con la infraestructura contenerizada del sistema. Su principal limitación reside en que el modo basado en WhatsApp Web constituye un mecanismo no oficial, con posibles restricciones de estabilidad y de cumplimiento frente a la alternativa provista por Meta. Por este motivo, el sistema se diseñó de manera compatible con la API de WhatsApp Business y se encuentra prevista la migración a la vía oficial. Esta compatibilidad se estableció como requerimiento de interoperabilidad desde la planificación del trabajo, de modo que el cambio no implica modificaciones estructurales en los flujos de procesamiento.
+La elección de Evolution API para la etapa inicial del trabajo se fundamentó en su costo nulo, en su rapidez de puesta en marcha (no requiere verificación comercial ni aprobación de plantillas) y en su despliegue autoalojado, coherente con la infraestructura del sistema. Su principal limitación es que el modo basado en WhatsApp Web constituye un mecanismo no oficial, con posibles restricciones de estabilidad y cumplimiento. Por ese motivo, el sistema se diseñó compatible con la API oficial de WhatsApp Business, y la migración prevista no implica modificaciones estructurales en los flujos de procesamiento.
 
 \subsection{Comunicación segura con la nube}
 \label{subsec:cloudflare}
 
 Para vincular los servicios en la nube con el servidor local sin apertura de puertos en la red del comercio, se emplea un túnel seguro provisto por Cloudflare \cite{cloudflaretunnel}. Un cliente ligero, ejecutado en el servidor local, establece una conexión cifrada saliente hacia la infraestructura del proveedor. A través de esa conexión, los servicios remotos alcanzan al nodo de borde.
 
-Las alternativas consideradas presentaban desventajas claras para este escenario. La exposición directa del servidor mediante la apertura de puertos en el enrutador del local requiere una dirección IP pública o un servicio de DNS dinámico (del inglés, \textit{Domain Name System}), exige configurar el equipamiento de red del comercio y deja un servicio a la escucha de conexiones entrantes desde Internet, lo que amplía la superficie de ataque. Una red privada virtual (VPN, del inglés \textit{Virtual Private Network}) entre la nube y el local resuelve la seguridad, pero agrega administración de claves y configuración en ambos extremos. El túnel de Cloudflare, en cambio, no requiere configuración alguna del enrutador, ya que la conexión es saliente. Además, cifra el tráfico de extremo a extremo y mantiene la red interna del negocio sin exposición entrante. Todo ello con una operación mínima, condición determinante en un local sin personal técnico.
+Se consideraron dos alternativas. La apertura de puertos en el enrutador del local exige configurar el equipamiento de red y deja un servicio a la escucha de conexiones entrantes desde Internet, lo que amplía la superficie de ataque. Una red privada virtual (VPN, del inglés \textit{Virtual Private Network}) resuelve la seguridad, pero agrega administración de claves y configuración en ambos extremos. El túnel de Cloudflare, en cambio, no requiere configuración del enrutador, ya que la conexión es saliente, cifra el tráfico de extremo a extremo y mantiene la red interna sin exposición entrante, con una operación mínima acorde a un local sin personal técnico.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -72,7 +68,7 @@ Las alternativas consideradas presentaban desventajas claras para este escenario
 \section{Plataformas cloud y servicios}
 \label{sec:plataformas_cloud}
 
-En esta sección se describen los servicios en la nube sobre los que se apoya el sistema. La plataforma que orquesta los flujos de procesamiento, la infraestructura donde se despliegan los componentes y los servicios de inteligencia artificial que resuelven la interpretación de los pedidos.
+En esta sección se describen los servicios en la nube sobre los que se apoya el sistema, que comprenden la plataforma de orquestación de los flujos de procesamiento, la infraestructura donde se despliegan los componentes y los servicios de inteligencia artificial que resuelven la interpretación de los pedidos.
 
 \subsection{Orquestación de flujos de trabajo}
 \label{subsec:n8n}
@@ -84,41 +80,22 @@ Frente a alternativas comerciales de automatización en la nube, como Zapier \ci
 \subsection{Infraestructura de despliegue}
 \label{subsec:vps_docker}
 
-Los servicios en la nube se alojan en un servidor privado virtual (VPS, del inglés \textit{Virtual Private Server}) del proveedor Hostinger \cite{hostinger}, en su plan KVM 4. Este plan provee 4 núcleos virtuales de procesamiento, 16 GB de memoria RAM, 200 GB de almacenamiento NVMe (del inglés, \textit{Non-Volatile Memory Express}) y 16 TB de transferencia mensual. El dimensionamiento respondió a la carga concurrente del sistema. Sobre el mismo servidor conviven la pasarela de mensajería, el motor de flujos, las bases de datos y el panel web. El almacenamiento NVMe favorece la baja latencia de las operaciones sobre la base de datos.
+Los servicios en la nube se alojan en un servidor privado virtual (VPS, del inglés \textit{Virtual Private Server}) del proveedor Hostinger \cite{hostinger}, en su plan KVM 4. Este plan provee 4 núcleos virtuales, 16 GB de memoria RAM, 200 GB de almacenamiento NVMe y 16 TB de transferencia mensual. El dimensionamiento respondió a la carga concurrente del sistema, ya que sobre el mismo servidor conviven la pasarela de mensajería, el motor de flujos, las bases de datos y el panel web.
 
-Todos los servicios se despliegan de forma contenerizada mediante Docker \cite{docker}. La contenerización empaqueta cada servicio junto con sus dependencias en unidades aisladas y reproducibles, lo que aporta tres beneficios concretos. El despliegue completo del sistema se describe en archivos versionables. El entorno puede reproducirse en otro servidor, o en un equipo local de pruebas, sin diferencias de configuración. Cada componente puede actualizarse o reiniciarse de manera independiente, sin afectar al resto.
+Todos los servicios se despliegan de forma contenerizada mediante Docker \cite{docker}. La contenerización empaqueta cada servicio junto con sus dependencias en unidades aisladas y reproducibles, lo que permite describir el despliegue en archivos versionables, reproducir el entorno sin diferencias de configuración y actualizar cada componente de manera independiente.
 
 \subsection{Servicios de inteligencia artificial}
 \label{subsec:servicios_ia}
 
 La interpretación de los pedidos requiere resolver tres tareas diferenciadas: convertir los mensajes de voz en texto, leer las listas manuscritas enviadas como fotografía y extraer de un texto informal los productos, las cantidades y las unidades solicitadas. Cada tarea se resuelve con un modelo de inteligencia artificial consumido como servicio en la nube, provisto por OpenAI \cite{openai} o por Anthropic \cite{claude}.
 
-La transcripción de audio se realiza con el servicio de transcripción de OpenAI, basado en el modelo Whisper \cite{whisper}, un sistema de reconocimiento automático del habla entrenado sobre un corpus extenso y multilingüe. Su característica más relevante para este trabajo es la robustez frente a condiciones adversas de grabación: ruido de fondo, variabilidad de acentos y calidad desigual del micrófono. Los mensajes de voz de los clientes se graban dentro del comercio o en la vía pública, sin control sobre el entorno sonoro, por lo que esa robustez resultó determinante.
+La transcripción de audio se realiza con el servicio de transcripción de OpenAI, basado en el modelo Whisper \cite{whisper}. Su característica más relevante para este trabajo es la robustez frente a condiciones adversas de grabación, como el ruido de fondo, la variabilidad de acentos y la calidad desigual del micrófono. Los mensajes de voz de los clientes se graban dentro del comercio o en la vía pública, sin control sobre el entorno sonoro, por lo que esa robustez resultó determinante.
 
-La lectura de las imágenes se resuelve con modelos multimodales de visión. Se evaluó como alternativa un motor de reconocimiento óptico de caracteres (OCR, del inglés \textit{Optical Character Recognition}) clásico, que transcribe texto a partir de la forma de los caracteres. Las imágenes recibidas presentan una variedad amplia: listas manuscritas fotografiadas con el teléfono, con caligrafías dispares e iluminación irregular, y también capturas de planillas de cálculo enviadas como imagen. En ese escenario, el OCR tradicional pierde precisión, porque opera sobre cada carácter de manera aislada y sin considerar la disposición del contenido. Los modelos multimodales, en cambio, interpretan la imagen en su contexto, reconocen la estructura tabular y aprovechan el conocimiento del dominio para resolver ambigüedades.
+La lectura de las imágenes se resuelve con modelos multimodales de visión. Se evaluó como alternativa un motor de reconocimiento óptico de caracteres (OCR, del inglés \textit{Optical Character Recognition}) clásico, pero las imágenes recibidas (listas manuscritas con caligrafías dispares e iluminación irregular, y capturas de planillas) le hacen perder precisión, porque opera sobre cada carácter de manera aislada y sin considerar la disposición del contenido. Los modelos multimodales, en cambio, interpretan la imagen en su contexto, reconocen la estructura tabular y aprovechan el conocimiento del dominio para resolver ambigüedades.
 
-Sobre cada imagen se ejecutan dos modelos de proveedores distintos: GPT-4o de OpenAI y Claude Sonnet de Anthropic. La decisión respondió a un problema detectado durante el desarrollo: ante una misma imagen, ambos modelos producen en ocasiones lecturas discrepantes, en particular con caligrafías difíciles o con planillas de estructura compleja. Las dos lecturas se reconcilian luego en un tercer paso, donde un modelo de lenguaje las compara, corrige los errores detectados y devuelve una transcripción única. Esta redundancia agrega costo y latencia, pero reduce el riesgo de un error silencioso en la etapa más frágil de la interpretación.
+Sobre cada imagen se ejecutan dos modelos de proveedores distintos, GPT-4o de OpenAI y Claude Sonnet de Anthropic, porque ante una misma imagen producen en ocasiones lecturas discrepantes, sobre todo con caligrafías difíciles o planillas complejas. Las dos lecturas se reconcilian en un tercer paso, donde el modelo GPT-5.5 de OpenAI las compara, corrige las diferencias y devuelve una transcripción única. Esta redundancia agrega costo y latencia, pero reduce el riesgo de un error silencioso en la etapa más frágil de la interpretación.
 
-La estructuración final se resuelve con un modelo extenso de lenguaje (LLM, del inglés \textit{Large Language Model}) de OpenAI, integrado como agente dentro del flujo. El modelo recibe el texto del pedido, ya sea el original o el obtenido de las etapas anteriores, junto con el catálogo de productos del comercio, y produce una representación estructurada con los productos, las cantidades y las unidades. Esta capacidad de interpretar lenguaje informal, con abreviaturas, errores de tipeo y denominaciones no normalizadas, constituye el aporte central de estos modelos a la solución.
-
-En la tabla \ref{tab:modelos_ia} se resumen los modelos empleados en cada etapa.
-
-\begin{table}[htbp]
-    \centering
-    \caption{Modelos de inteligencia artificial empleados en cada etapa de la interpretación.}
-    \label{tab:modelos_ia}
-    \begin{tabular}{l l l}
-        \toprule
-        \textbf{Etapa}              & \textbf{Modelo} & \textbf{Proveedor} \\
-        \midrule
-        Transcripción de audio      & Whisper         & OpenAI             \\
-        Lectura de imagen (primera) & GPT-4o          & OpenAI             \\
-        Lectura de imagen (segunda) & Claude Sonnet   & Anthropic          \\
-        Reconciliación de lecturas  & GPT-5.5         & OpenAI             \\
-        Estructuración del pedido   & GPT-5.5         & OpenAI             \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+La estructuración final se resuelve con un modelo extenso de lenguaje (LLM, del inglés \textit{Large Language Model}), GPT-5.5 de OpenAI, integrado como agente dentro del flujo. Recibe el texto del pedido junto con el catálogo del comercio y produce una representación estructurada con los productos, las cantidades y las unidades. Su capacidad de interpretar lenguaje informal, con abreviaturas, errores de tipeo y denominaciones no normalizadas, constituye el aporte central de estos modelos a la solución.
 
 La decisión de consumir estos modelos como servicio, en lugar de ejecutarlos sobre la propia infraestructura, define la distribución del cómputo entre el borde y la nube. Los tres modelos exigen recursos de procesamiento muy superiores a los del nodo de borde, por lo que su ejecución local no resultaba viable con el equipamiento del comercio. Su consumo como servicio mantiene la inversión inicial y la complejidad operativa en el mínimo. El costo es doble: un componente variable por uso y la dependencia de la conectividad para la etapa de interpretación. La actuación crítica del sistema permanece en el borde, de manera que esa dependencia no compromete la operación local de impresión.
 
@@ -134,9 +111,9 @@ En esta sección se presentan las herramientas de persistencia de datos y los co
 \subsection{Bases de datos}
 \label{subsec:bases_datos}
 
-La información de pedidos, clientes y productos se almacena en PostgreSQL \cite{postgresql}, una base de datos relacional de código abierto, madura y ampliamente adoptada. Su modelo relacional con integridad referencial resulta adecuado para el dominio del problema, donde los pedidos se vinculan con clientes y con artículos del catálogo. La trazabilidad exigida al sistema, es decir la reconstrucción del recorrido de cada pedido desde el mensaje original hasta la impresión, requiere garantías de consistencia transaccional. Las consultas estructuradas sobre el historial alimentan además las métricas del panel de control.
+La información de pedidos, clientes y productos se almacena en PostgreSQL \cite{postgresql}, una base de datos relacional de código abierto. Su modelo relacional con integridad referencial resulta adecuado para el dominio del problema, donde los pedidos se vinculan con clientes y con artículos del catálogo. La trazabilidad exigida al sistema requiere garantías de consistencia transaccional, y las consultas sobre el historial alimentan además las métricas del panel de control.
 
-De manera complementaria se emplea Redis \cite{redis}, una base de datos en memoria de tipo clave-valor, para la gestión de las sesiones y del estado de los clientes activos durante la recepción de un pedido. Redis ofrece tiempos de acceso muy bajos y expiración automática de claves, características apropiadas para datos de carácter transitorio con alta frecuencia de lectura y escritura. La combinación responde a un criterio de diseño explícito: los datos persistentes y auditables residen solo en la base relacional, mientras que Redis se reserva para información temporal. De este modo, una eventual falla de la capa en memoria no compromete los registros del negocio.
+De manera complementaria se emplea Redis \cite{redis}, una base de datos en memoria de tipo clave-valor, para la gestión de las sesiones y del estado de los clientes activos durante la recepción de un pedido. Redis ofrece tiempos de acceso muy bajos y expiración automática de claves, características apropiadas para datos de carácter transitorio con alta frecuencia de lectura y escritura. La combinación responde a un criterio de diseño explícito: los datos persistentes y auditables residen solo en la base relacional, mientras que Redis se reserva para información temporal, de modo que una eventual falla de la capa en memoria no compromete los registros del negocio.
 
 \subsection{Servidor local y panel de visualización}
 \label{subsec:flask_panel}
