@@ -307,13 +307,13 @@ El sistema presenta dos interfaces hacia el personal del comercio: el ticket imp
 \subsection{El ticket impreso}
 \label{subsec:ticket_impreso}
 
-El ticket es la salida física del sistema y el insumo directo para el armado del pedido. Su formato es fijo. Incluye un encabezado con los datos del cliente, la lista de productos con cantidades y unidades, una sección separada para los productos no reconocidos, un espacio para las aclaraciones y la fecha y hora del pedido. En la figura \ref{fig:ticket} se muestra un ticket generado por el sistema.
+El ticket es la salida física del sistema y el insumo directo para el armado del pedido. Su formato es fijo. Incluye un encabezado con los datos del cliente, la lista de productos con cantidades y unidades, una sección separada para los productos no reconocidos, un espacio para las aclaraciones y la fecha y hora del pedido. En la figura \ref{fig:esquema_ticket} se presenta un esquema de esos campos. En el anexo \ref{AppendixA} se incluye una imagen de un ticket real generado por el sistema.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.45\textwidth]{Figures/ticket_impreso.png}
-  \caption{Ticket generado por el sistema e impreso en el comercio.}
-  \label{fig:ticket}
+  \includegraphics[width=0.55\textwidth]{Figures/esquema_ticket.pdf}
+  \caption{Esquema de los campos que componen el ticket.}
+  \label{fig:esquema_ticket}
 \end{figure}
 
 El diseño del ticket estuvo condicionado por el medio. El ancho útil del papel es de ochenta milímetros, lo que limita la cantidad de caracteres por línea y obliga a priorizar la información. Por ese motivo, el servidor de impresión admite distintos tamaños de tipografía, que se aplican mediante comandos ESC/POS. Los datos que el personal necesita leer a distancia, en particular el nombre del cliente, se imprimen en tamaño ampliado, mientras que el detalle de los productos se mantiene en tamaño normal para aprovechar el ancho disponible.
@@ -321,81 +321,31 @@ El diseño del ticket estuvo condicionado por el medio. El ancho útil del papel
 \subsection{El panel web de control}
 \label{subsec:panel}
 
-El panel se desarrolló con Angular y la biblioteca de componentes Angular Material. Concentra la operación diaria y la administración del sistema. El acceso está protegido por autenticación, y las vistas de administración quedan restringidas según el rol de la persona que ingresa.
-
-\subsubsection{Tablero principal}
-
-El tablero es la vista de entrada al sistema y resume el estado de la operación del día. En la figura \ref{fig:panel_dashboard} se presenta esa vista.
+El panel se desarrolló con Angular y la biblioteca de componentes Angular Material. Concentra la operación diaria y la administración del sistema. El acceso está protegido por autenticación, y las vistas de administración quedan restringidas según el rol de la persona que ingresa. En la figura \ref{fig:sitemap_panel} se presenta la estructura de navegación del panel.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{Figures/panel_dashboard.png}
-  \caption{Tablero principal del panel de control.}
-  \label{fig:panel_dashboard}
+  \includegraphics[width=\textwidth]{Figures/sitemap_panel.pdf}
+  \caption{Estructura de navegación del panel web de control.}
+  \label{fig:sitemap_panel}
 \end{figure}
 
-El tablero agrupa cuatro bloques de información: los pedidos aún no revisados por el personal, los pedidos recibidos en los últimos minutos, los productos más solicitados en el día y los pedidos con errores de impresión pendientes de resolución. Cada bloque enlaza con la vista de pedidos, con los filtros ya aplicados, de modo que una alerta deriva de forma directa en la acción correspondiente.
+La navegación se organiza en tres grupos. El primero es la operación diaria, con el tablero de resumen y la gestión de pedidos. El segundo es la administración del catálogo y de los datos comerciales, que reúne los productos, las categorías, las unidades, los clientes y sus listas de precios. El tercero es la visualización de métricas de operación.
 
-\subsubsection{Gestión de pedidos}
+El tablero es la vista de entrada y resume el estado de la jornada. Agrupa cuatro bloques de información: los pedidos aún no revisados por el personal, los pedidos recibidos en los últimos minutos, los productos más solicitados en el día y los pedidos con errores de impresión pendientes de resolución. Cada bloque enlaza con la vista de pedidos con los filtros ya aplicados, de modo que una alerta deriva de forma directa en la acción correspondiente.
 
-La vista de pedidos es la de mayor uso durante la jornada. Permite filtrar por estado, por rango de fechas, por pedidos no vistos y por errores de impresión. En la figura \ref{fig:panel_pedidos} se muestra el listado.
+La gestión de pedidos es la vista de mayor uso durante la jornada. Permite filtrar por estado, por rango de fechas, por pedidos no vistos y por errores de impresión, y admite operaciones sobre varios pedidos a la vez, como el cambio de estado o la marca de revisado. El detalle de cada pedido se abre en un diálogo desde el que el personal corrige cantidades y unidades, agrega o quita ítems, consulta el mensaje original recibido por WhatsApp, accede al hilo de la conversación e imprime o reimprime el pedido. Los ítems que no pudieron asociarse al catálogo se destacan de forma visual, lo que dirige la atención hacia los casos que requieren decisión.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{Figures/panel_pedidos.png}
-  \caption{Listado de pedidos con sus filtros de búsqueda.}
-  \label{fig:panel_pedidos}
-\end{figure}
+La administración del catálogo reúne los productos, sus categorías y las unidades de medida. Esta gestión resulta crítica, ya que el catálogo es el insumo que el agente utiliza para normalizar las denominaciones, y un producto ausente se traduce de inmediato en ítems no reconocidos. La administración de precios se resuelve en una vista específica, con el listado de listas del cliente a un lado y la tabla de precios editable al otro.
 
-El listado admite operaciones sobre varios pedidos a la vez, como el cambio de estado o la marca de revisado, pensadas para los momentos de mayor demanda. El detalle de cada pedido se abre en un diálogo que concentra la operación individual, según se observa en la figura \ref{fig:panel_detalle}.
+Las métricas de operación se representan con la biblioteca Chart.js e incluyen el tráfico de pedidos por día y hora, la evolución de la facturación por producto y la distribución por categoría. La granularidad de la serie se ajusta de forma automática al rango solicitado, con lo que se evitan gráficos ilegibles por exceso de puntos. El tráfico por día y hora resultó de utilidad directa para el negocio, ya que expone los momentos de mayor demanda y permite anticipar la asignación de personal.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=0.55\textwidth]{Figures/panel_detalle_pedido.png}
-  \caption{Detalle de un pedido, con edición de ítems y acceso al mensaje original.}
-  \label{fig:panel_detalle}
-\end{figure}
-
-Desde ese diálogo, el personal puede corregir las cantidades y las unidades, agregar o quitar ítems, consultar el mensaje original recibido por WhatsApp, acceder al hilo de la conversación e imprimir o reimprimir el pedido. Los ítems que no pudieron asociarse al catálogo se destacan de forma visual, lo que dirige la atención del personal hacia los casos que requieren decisión.
-
-\subsubsection{Administración del catálogo y de los precios}
-
-El catálogo de productos, sus categorías y las unidades de medida se administran desde el panel. Esta gestión resulta crítica para el funcionamiento del sistema, ya que el catálogo es el insumo que el agente utiliza para normalizar las denominaciones. Un producto ausente del catálogo se traduce de inmediato en ítems no reconocidos en los pedidos.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{Figures/panel_productos.png}
-  \caption{Administración del catálogo de productos.}
-  \label{fig:panel_productos}
-\end{figure}
-
-La administración de precios se resolvió en una vista específica, con el listado de listas del cliente a un lado y la tabla de precios editable al otro. En la figura \ref{fig:panel_precios} se presenta esa vista.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{Figures/panel_listas_precios.png}
-  \caption{Administración de las listas de precios de un cliente.}
-  \label{fig:panel_precios}
-\end{figure}
-
-\subsubsection{Métricas de operación}
-
-Las métricas se representan con la biblioteca Chart.js. La vista incluye el tráfico de pedidos por día y hora, la evolución de la facturación por producto y la distribución por categoría. En la figura \ref{fig:panel_estadisticas} se muestra esa vista.
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{Figures/panel_estadisticas.png}
-  \caption{Vista de métricas de operación del comercio.}
-  \label{fig:panel_estadisticas}
-\end{figure}
-
-La consulta admite distintos rangos temporales, y la granularidad de la serie se ajusta de forma automática al rango solicitado: diaria hasta una semana, semanal hasta tres meses y mensual para períodos mayores. Este ajuste evita gráficos ilegibles por exceso de puntos. El tráfico por día y hora resultó de utilidad directa para el negocio, ya que expone los momentos de mayor demanda y permite anticipar la asignación de personal.
+Las capturas de cada vista del panel se incluyen en el anexo \ref{AppendixA}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 6
 %----------------------------------------------------------------------------------------
 
-\vspace{50em}
 \section{Seguridad del sistema}
 \label{sec:seguridad}
 
