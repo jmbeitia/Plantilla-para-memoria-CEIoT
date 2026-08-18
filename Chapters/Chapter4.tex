@@ -1,16 +1,422 @@
 % !TEX root = ../memorianueva.tex
-% Chapter Template
+% Chapter 4
 
 \chapter{Ensayos y resultados} % Main chapter title
 
-\label{Chapter4} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
-Todos los capítulos deben comenzar con un breve párrafo introductorio que indique cuál es el contenido que se encontrará al leerlo.  La redacción sobre el contenido de la memoria debe hacerse en presente y todo lo referido al proyecto en pasado, siempre de modo impersonal.
+\label{Chapter4} % Para referenciar este capítulo: \ref{Chapter4}
+
+En el presente capítulo se describen las pruebas realizadas sobre el sistema y los resultados obtenidos. Se presenta primero el plan de ensayos, con su metodología, sus instrumentos de medición y sus criterios de evaluación. Luego se exponen los ensayos de conectividad y comunicación, los de la capa de aplicación y los de integración extremo a extremo. El capítulo cierra con el análisis de los resultados, las limitaciones detectadas y las mejoras que se desprenden de ellas.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
 %----------------------------------------------------------------------------------------
 
-\section{Pruebas funcionales del hardware}
-\label{sec:pruebasHW}
+\section{Plan de ensayos}
+\label{sec:plan_ensayos}
 
-La idea de esta sección es explicar cómo se hicieron los ensayos, qué resultados se obtuvieron y analizarlos.
+El plan de ensayos se organizó en dos niveles complementarios. El primero corresponde a la verificación y reúne las pruebas orientadas a comprobar que cada componente fue construido de acuerdo con lo especificado. El segundo corresponde a la validación y reúne las pruebas ejecutadas sobre el sistema en operación real en el comercio, orientadas a comprobar que la solución resuelve el problema planteado.
+
+\subsection{Alcance y ventanas de medición}
+\label{subsec:alcance_medicion}
+
+La condición particular de este trabajo es que el sistema se desplegó en producción y operó de forma continua durante el período de evaluación. Esa circunstancia permitió sustituir buena parte de los ensayos de laboratorio por mediciones sobre la operación real, con un volumen de casos muy superior al que habría aportado un banco de pruebas construido para la ocasión.
+
+El sistema entró en operación el 1 de junio de 2026 y el primer pedido quedó registrado el 4 de junio. Sobre la ventana comprendida entre esa fecha y el 17 de agosto de 2026 se procesaron 3871 pedidos de 202 clientes, con un total de 29457 ítems y un promedio de 7,61 ítems por pedido.
+
+Las mediciones no cubren todas un mismo intervalo, ya que cada subsistema conserva su información durante un lapso distinto. En la tabla \ref{tab:ventanas} se detallan las tres ventanas empleadas y el motivo de su extensión.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Ventanas de medición empleadas en los ensayos.}
+    \label{tab:ventanas}
+    \begin{tabular}{p{5.2cm} p{3.3cm} c p{3.2cm}}
+        \toprule
+        \textbf{Aspecto medido}             & \textbf{Período}    & \textbf{Días} & \textbf{Limitación}                     \\
+        \midrule
+        Captura e interpretación de pedidos & 04/06 al 17/08/2026 & 75            & Inicio de la operación                  \\
+        Impresión automática en el borde    & 29/06 al 17/08/2026 & 50            & Habilitación de la impresión automática \\
+        Ejecuciones de la orquestación      & 04/08 al 17/08/2026 & 14            & Purga automática de ejecuciones         \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+La diferencia entre la primera y la segunda ventana obedece a la puesta en marcha escalonada de la solución. Durante las cuatro primeras semanas la capa de captura e interpretación operó con el volumen completo de pedidos, pero el comercio aún no contaba con la impresora térmica. En ese período los pedidos interpretados se volcaron a un archivo de texto alojado en un servicio de almacenamiento en la nube, que el personal consultaba de forma manual. Ese mecanismo cumplió una doble función: permitió sostener la operación sin la actuación en el borde y habilitó la revisión sistemática de la calidad de la interpretación antes de automatizar la emisión de tickets.
+
+Una vez adquirida e instalada la impresora, y verificada la correcta interpretación de los pedidos durante ese período de observación, la actuación automática sobre el nodo de borde se habilitó en la semana del 29 de junio. A partir de ese momento el volumen de impresiones se estabilizó por encima de las quinientas operaciones semanales. La decisión de no automatizar la impresión hasta contar con evidencia de la calidad de la interpretación constituyó una medida deliberada de reducción de riesgo operativo.
+
+La tercera ventana responde a una restricción del registro de ejecuciones de la plataforma de orquestación, que conserva las ejecuciones durante catorce días y luego las elimina de forma automática. Sobre ese lapso se registraron 7036 ejecuciones y 789 pedidos.
+
+\subsection{Instrumentos de medición}
+\label{subsec:instrumentos}
+
+La medición se apoyó en tres fuentes de información distintas.
+
+La primera es la base de datos relacional del sistema, que registra cada pedido, cada ítem y cada intento de impresión con su marca temporal y su resultado. La tabla \code{print\_logs} conserva el estado de cada operación de impresión y el mensaje de error asociado, mientras que la ausencia de valor en el campo \code{producto\_id} de la tabla \code{items\_pedido} identifica los ítems que el agente no logró vincular con el catálogo del comercio. Esta fuente aporta la totalidad de la información de las secciones \ref{sec:ensayos_conectividad} y \ref{sec:ensayos_aplicacion}. Corresponde señalar que la base conserva el pedido ya estructurado y no el mensaje original recibido, que permanece disponible en la plataforma de atención vinculada al canal de mensajería.
+
+La segunda es el registro de ejecuciones de la plataforma de orquestación, que conserva el instante de inicio y de finalización de cada flujo junto con su estado final. Esa información permite acotar el tiempo de interpretación, que no queda registrado en la base relacional del sistema.
+
+La tercera es un conjunto de ensayos controlados ejecutados en el comercio, con envío deliberado de pedidos en cada uno de los formatos admitidos y con interrupciones provocadas de la conectividad. Estos ensayos cubren las dimensiones que las fuentes anteriores no permiten discriminar, que son la comparación entre formatos de entrada y el comportamiento del sistema ante una caída del enlace.
+
+\subsection{Estrategia de verificación adoptada}
+\label{subsec:estrategia_verificacion}
+
+Los requerimientos de testing previeron la ejecución de pruebas unitarias sobre los módulos de procesamiento e impresión y de pruebas de integración entre los componentes. La revisión del repositorio confirmó que no se implementaron conjuntos de pruebas automatizadas, más allá del archivo de ejemplo que genera el entorno de desarrollo del panel, que no contiene casos de prueba.
+
+En su reemplazo, la verificación se apoyó en la operación real del sistema durante 75 días. Esa estrategia aporta una cobertura de casos superior a la que habría alcanzado un conjunto de pruebas construido para la ocasión, con la variabilidad propia de los mensajes de clientes reales, y permite validar de forma simultánea la integración de todos los componentes. Su limitación es que no detecta regresiones de manera anticipada ni permite aislar la causa de una falla en un componente determinado, motivo por el cual la incorporación de pruebas automatizadas se propone como trabajo futuro en el capítulo \ref{Chapter5}.
+
+\subsection{Criterios de evaluación}
+\label{subsec:criterios}
+
+La planificación del trabajo definió, para cada requerimiento, un método de verificación y un método de validación, pero no estableció valores numéricos de corte con anterioridad al desarrollo. Los ensayos descriptos en este capítulo son, en consecuencia, de caracterización: se orientan a determinar el comportamiento efectivo del sistema en operación antes que a contrastarlo contra umbrales preestablecidos.
+
+El criterio de aceptación que operó de manera efectiva fue la validación por parte del cliente en el entorno real. El sistema se incorporó a la operación diaria del comercio y permaneció en uso continuo durante todo el período analizado, lo que constituye una forma de aceptación por uso sostenido. En la sección \ref{subsec:verificacion_requerimientos} se contrasta cada requerimiento contra la evidencia obtenida.
+
+%----------------------------------------------------------------------------------------
+%	SECTION 2
+%----------------------------------------------------------------------------------------
+
+\section{Ensayos de conectividad y comunicación}
+\label{sec:ensayos_conectividad}
+
+Los ensayos de conectividad se orientaron a verificar el vínculo entre la nube y el nodo de borde, que constituye el único punto de contacto entre ambos entornos y, por lo tanto, el eslabón crítico de la cadena. La medición se apoyó en la operación real: cada intento de envío de un ticket hacia el servidor local quedó registrado con su resultado y, en caso de falla, con el mensaje de error devuelto.
+
+\subsection{Confiabilidad del vínculo en operación}
+\label{subsec:confiabilidad_vinculo}
+
+El análisis distingue el período de prueba de la impresora del período de operación automática, ya que las condiciones difieren por completo. Durante las cuatro primeras semanas, cuando el comercio aún no contaba con el equipo, se registraron 39 operaciones de impresión de las cuales 13 finalizaron con error. Esos casos carecen de valor para evaluar la confiabilidad del vínculo, dado que el destino de la orden no existía.
+
+Durante el período de operación automática, comprendido entre el 29 de junio y el 17 de agosto, se registraron 4334 operaciones de impresión de las cuales 22 finalizaron con error, lo que arroja una tasa de fallas del 0,51 por ciento.
+En la tabla \ref{tab:errores_conectividad} se detalla la clasificación de los errores del período de operación automática según su mensaje y su origen.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Clasificación de los errores registrados durante la operación automática.}
+    \label{tab:errores_conectividad}
+    \begin{tabular}{l p{6.2cm} c}
+        \toprule
+        \textbf{Mensaje}  & \textbf{Origen}               & \textbf{Casos} \\
+        \midrule
+        HTTP 530          & Túnel sin origen alcanzable   & 18             \\
+        HTTP 502          & Pasarela intermedia           & 2              \\
+        HTTP 520          & Respuesta inválida del origen & 1              \\
+        Fallo de conexión & Red entre la nube y el túnel  & 1              \\
+        \midrule
+        Total             &                               & 22             \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+La totalidad de los errores del período de operación automática corresponde a interrupciones del vínculo de comunicación. Los códigos 530 y 520 son emitidos por el proveedor del túnel cuando el extremo local no responde, situación que se produce ante una caída de la conexión a Internet del comercio o ante la detención del proceso en el servidor local. Ningún error se originó en la impresora ni en el formateo del ticket, lo que indica que la actuación física en el borde resultó estable durante todo el período.
+
+Este comportamiento respalda el criterio de distribución del cómputo adoptado en la sección \ref{subsec:criterio_distribucion}. La única dependencia externa del proceso de impresión es la llegada de la orden desde la nube, y una vez que esa orden alcanza el nodo de borde la operación se completa sin intermediarios.
+
+\subsection{Análisis de los episodios de pérdida de conectividad}
+\label{subsec:episodios_conectividad}
+
+La distribución temporal de los errores resultó más informativa que su recuento. Los 22 casos no se presentaron de forma aislada sino agrupados en episodios de indisponibilidad del vínculo, según se detalla en la tabla \ref{tab:episodios}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Episodios de pérdida de conectividad registrados durante la operación automática.}
+    \label{tab:episodios}
+    \begin{tabular}{l c c c c}
+        \toprule
+        \textbf{Fecha} & \textbf{Duración} & \textbf{Pedidos afectados} & \textbf{Mensaje}  & \textbf{Sin ticket} \\
+        \midrule
+        11/07/2026     & 1 h 12 min        & 9                          & HTTP 530          & 8                   \\
+        13/07/2026     & Aislado           & 1                          & HTTP 502          & 0                   \\
+        18/07/2026     & Aislado           & 1                          & HTTP 520          & 1                   \\
+        24/07/2026     & Aislado           & 1                          & Fallo de conexión & 0                   \\
+        27/07/2026     & Aislado           & 1                          & HTTP 530          & 0                   \\
+        28/07/2026     & 1 h 25 min        & 5                          & HTTP 530          & 5                   \\
+        29/07/2026     & 8 min             & 3                          & HTTP 502 y 530    & 1                   \\
+        \midrule
+        Total          &                   & 21                         &                   & 15                  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Los dos episodios prolongados concentran 14 de los 21 pedidos afectados y presentan un patrón coherente con una interrupción del servicio de Internet en el comercio: fallas consecutivas sobre pedidos distintos, mismo código de error y cese simultáneo al finalizar el episodio. Los casos aislados se resolvieron en plazos que van de los 12 segundos a las 16 horas.
+
+El resultado exige una precisión que corrige la lectura inicial de estos datos. El registro de impresiones incorpora un campo mediante el cual el personal marca un error como atendido, y la totalidad de los casos figura con esa marca. Sin embargo, la verificación de las impresiones anteriores y posteriores a cada error muestra un panorama distinto. Tres de los pedidos afectados ya contaban con un ticket emitido, de modo que la falla se produjo sobre una reimpresión. Otros tres recibieron su ticket con posterioridad al episodio. Los 15 restantes no registran ninguna emisión exitosa, lo que representa el 0,39 por ciento de los 3871 pedidos procesados durante el período. La marca de atención refleja, por lo tanto, la resolución operativa del caso por parte del personal, que consultó el pedido en el panel y lo armó sin comprobante impreso, y no la emisión efectiva del ticket.
+
+La consecuencia de diseño es doble. Por un lado, la indisponibilidad del vínculo no interrumpe la operación del comercio, ya que el pedido permanece accesible en el panel con la totalidad de su información y el personal puede continuar el armado. Por el otro, el sistema carece de un mecanismo de reintento automático que emita los tickets pendientes al restablecerse el enlace, de modo que la recuperación depende de que el personal advierta la situación. Los episodios registrados muestran que el enlace se restablece por sí solo en plazos acotados, lo que vuelve viable la mejora propuesta en la sección \ref{subsec:mejoras_ensayos}.
+
+%----------------------------------------------------------------------------------------
+%	SECTION 3
+%----------------------------------------------------------------------------------------
+
+\section{Ensayos de la capa de aplicación}
+\label{sec:ensayos_aplicacion}
+
+Los ensayos de la capa de aplicación se orientaron a evaluar dos dimensiones. La primera es la calidad de la interpretación de los pedidos, que constituye la función central del sistema. La segunda es la estabilidad de la plataforma de orquestación que coordina esa interpretación.
+
+\subsection{Tasa de reconocimiento de ítems}
+\label{subsec:tasa_reconocimiento}
+
+La métrica adoptada para evaluar la interpretación fue la proporción de ítems que el agente logró asociar con un producto del catálogo del comercio. Un ítem no asociado se registra con la denominación original recibida y se destaca en el panel, de modo que la operación continúa pero requiere una decisión del personal.
+
+Sobre un total de 29457 ítems procesados durante los 75 días de operación, 28999 fueron asociados con un producto del catálogo, lo que arroja una tasa de reconocimiento del 98,45 por ciento. Los 458 ítems restantes quedaron sin asociar y se distribuyeron en 213 denominaciones distintas.
+
+La magnitud de la muestra resulta relevante para la interpretación del resultado. La medición no se apoyó en un conjunto de prueba construido para la ocasión, sino en la totalidad de los pedidos recibidos durante la operación real del comercio, con la variabilidad de redacción, ortografía y formato propia de los mensajes de clientes reales.
+
+\subsection{Análisis de los ítems no reconocidos}
+\label{subsec:items_no_reconocidos}
+
+Las denominaciones no asociadas se clasificaron mediante su normalización, con supresión de tildes y unificación de mayúsculas, y su posterior comparación contra el catálogo de productos. El análisis permite distinguir seis situaciones de naturaleza distinta, que se detallan en la tabla \ref{tab:no_reconocidos}.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Clasificación de los ítems no asociados al catálogo.}
+    \label{tab:no_reconocidos}
+    \begin{tabular}{p{8.2cm} c c}
+        \toprule
+        \textbf{Situación}                                 & \textbf{Casos} & \textbf{Porcentaje} \\
+        \midrule
+        Variedades comerciales y códigos de calibre        & 112            & 0,38                \\
+        Producto incorporado al catálogo con posterioridad & 94             & 0,32                \\
+        Productos de almacén ausentes del catálogo         & 82             & 0,28                \\
+        Denominaciones sin correspondencia interpretable   & 80             & 0,27                \\
+        Frutas y hortalizas ausentes del catálogo          & 47             & 0,16                \\
+        Producto presente en el catálogo pero inactivo     & 29             & 0,10                \\
+        Contenido ilegible en el mensaje de origen         & 9              & 0,03                \\
+        Casos residuales posteriores al alta del producto  & 5              & 0,02                \\
+        \midrule
+        Total                                              & 458            & 1,55                \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+La primera situación reúne nombres de variedad y códigos de calibre propios del comercio mayorista de frutas. Las variedades de mandarina Ellendale y Encore concentran 38 casos y la variedad de pera Bosc concentra 18, a los que se suman numerosas denominaciones que combinan variedad, tipo de envase y calibre. Ninguna de ellas integra el catálogo del comercio, que registra los productos con su nombre genérico.
+
+La forma en que esas denominaciones quedaron registradas resulta significativa. La variedad Ellendale aparece bajo nueve escrituras distintas y la variedad Bosc bajo quince, con deformaciones progresivas que se extienden hasta las 68 denominaciones agrupadas como carentes de correspondencia interpretable. El patrón sugiere que el conjunto proviene de la lectura de listas manuscritas con terminología ausente del catálogo, situación en la que el agente carece de referencia para normalizar aquello que interpreta.
+% [PENDIENTE: la atribución a la modalidad de imagen manuscrita constituye una
+% inferencia a partir de la morfología de los errores, ya que el formato del
+% mensaje de origen no se registra. El ensayo por formato de la sección
+% \ref{subsec:ensayo_formatos} permitiría confirmarla. Si no se ejecuta, este
+% párrafo debe presentarse de forma explícita como hipótesis.]
+
+La segunda situación agrupa 94 ítems correspondientes a productos que no integraban el catálogo en el momento del pedido y que fueron incorporados con posterioridad. El caso más ilustrativo es el del huevo, con 55 ocurrencias registradas entre el 10 de junio y el 12 de julio. Ese último día el producto se dio de alta y a partir de entonces no se registró ningún fallo adicional. El patrón se repite en el resto del grupo y evidencia un mecanismo de realimentación operativa: los ítems no reconocidos que el panel destaca orientaron la ampliación progresiva del catálogo por parte del personal del comercio.
+
+La tercera y la quinta situación corresponden a productos que el comercio no comercializa. Entre los de almacén predominan la cúrcuma, con 15 casos, y diversos condimentos. Entre los frescos, el caso de mayor frecuencia es el hongo portobello, con 17 casos, cuya denominación correcta tampoco figura en el catálogo. En ambos grupos la interpretación del agente fue adecuada y la ausencia de asociación refleja una limitación de la cobertura del catálogo.
+
+La sexta situación reúne 29 ítems correspondientes a productos que integran el catálogo pero se encuentran marcados como inactivos, entre los que predominan la miel y el pimentón. El agente recibe únicamente los productos activos, de modo que la baja de un producto que los clientes aún solicitan se traduce de forma directa en ítems no asociados.
+
+La séptima situación corresponde a los mensajes cuyo contenido no pudo leerse, registrados con la marca de contenido ilegible en nueve oportunidades. Este comportamiento responde al diseño del agente, al que se instruyó para señalar la imposibilidad de lectura en lugar de inferir un producto probable. La decisión resultó acertada en el contexto del negocio, donde un ítem incorrecto en el ticket genera un error de armado del pedido, mientras que un ítem señalado como dudoso deriva en una consulta al cliente antes del despacho. Los cinco casos residuales de la última situación se registraron en los días inmediatamente posteriores al alta de un producto.
+
+La conclusión del análisis modifica de manera sustancial la lectura del 1,55 por ciento de ítems no asociados. De los 458 casos, 364 responden a la cobertura del catálogo, ya sea por productos ausentes, por variedades comerciales no contempladas o por productos dados de baja, y 9 corresponden a contenido ilegible señalado de forma deliberada. Únicamente los 80 casos sin correspondencia interpretable son atribuibles a un error de interpretación, lo que representa el 0,27 por ciento de los ítems procesados y sitúa la exactitud efectiva de la interpretación en el 99,73 por ciento.
+
+\subsection{Estabilidad de la orquestación}
+\label{subsec:estabilidad_orquestacion}
+
+La plataforma de orquestación coordina la recepción de los mensajes, la invocación de los modelos de interpretación y la persistencia de los pedidos. Su registro de ejecuciones permite evaluar la estabilidad del conjunto. En la tabla \ref{tab:flujos} se resumen las ejecuciones registradas durante la ventana de catorce días.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Ejecuciones registradas por flujo de orquestación.}
+    \label{tab:flujos}
+    \begin{tabular}{p{5.6cm} c c c}
+        \toprule
+        \textbf{Flujo}              & \textbf{Correctas} & \textbf{Con error} & \textbf{Duración media} \\
+        \midrule
+        Interpretación de pedidos   & 6710               & 2                  & 36,31 s                 \\
+        Confirmación de pedidos     & 299                & 4                  & 0,87 s                  \\
+        Sincronización de contactos & 13                 & 1                  & 3627,05 s               \\
+        Gestión de errores          & 7                  & 0                  & 0,49 s                  \\
+        \midrule
+        Total                       & 7029               & 7                  &                         \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Sobre 7036 ejecuciones se registraron 7 fallas, lo que arroja una tasa de error del 0,10 por ciento. Ese valor verifica el requerimiento de integración entre los componentes, ya que cada ejecución del flujo de interpretación involucra al canal de mensajería, a la base en memoria, a los servicios de inteligencia artificial y a la base relacional.
+
+La duración media del flujo de interpretación no debe leerse como tiempo de procesamiento, según se analiza en la sección \ref{subsec:composicion_latencia}.
+
+El flujo de sincronización de contactos presenta una duración media del orden de la hora, con trece ejecuciones en catorce días. Se trata de un proceso programado que opera de forma desacoplada del flujo de pedidos y que, por lo tanto, no incide sobre la latencia percibida por el comercio.
+% [PENDIENTE: el flujo de sincronización de contactos no fue descripto en el
+% capítulo 3. Corresponde documentarlo allí o justificar su omisión, ya que
+% aparece en las mediciones de este capítulo.]
+
+%----------------------------------------------------------------------------------------
+%	SECTION 4
+%----------------------------------------------------------------------------------------
+
+\section{Ensayos de integración extremo a extremo}
+\label{sec:ensayos_integracion}
+
+Los ensayos de integración evalúan el recorrido completo del pedido, desde la recepción del mensaje hasta la emisión del ticket en el comercio. El análisis se organiza en dos partes. La primera mide la latencia de la actuación en el borde, que es la etapa que el diseño buscó optimizar. La segunda descompone la latencia total y acota la contribución de cada tramo.
+
+\subsection{Latencia de la actuación en el borde}
+\label{subsec:latencia_borde}
+
+Se midió el tiempo transcurrido entre la persistencia del pedido en la base de datos y la emisión de su primer ticket. En la figura \ref{fig:latencia_impresion} se presenta la distribución obtenida sobre 2606 pedidos.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{Figures/latencia_impresion.pdf}
+    \caption{Distribución del tiempo transcurrido entre la persistencia del pedido y su primera impresión.}
+    \label{fig:latencia_impresion}
+\end{figure}
+
+La distribución resultó marcadamente bimodal. El 98,58 por ciento de los casos se resolvió en menos de cinco segundos y el 1,38 por ciento superó el minuto, mientras que en el intervalo intermedio, que abarca casi un minuto completo, se registró un único caso. Esa discontinuidad indica la presencia de dos poblaciones de naturaleza distinta y permite separarlas mediante un umbral de cinco segundos, cuya ubicación dentro de un intervalo vacío vuelve irrelevante la elección precisa del valor.
+
+La primera población corresponde a la impresión automática que el sistema dispara al persistir el pedido. La segunda corresponde a la reimpresión diferida que el personal ejecuta desde el panel, en general con precios incluidos, en el momento del despacho. Esa interpretación se confirma al observar que 1321 pedidos registraron exactamente dos impresiones, cantidad superior a los 1113 pedidos con una sola, y que 1621 de las impresiones correctas se emitieron con precios frente a 2717 sin ellos. La doble emisión responde al flujo operativo del comercio, que utiliza un ticket sin precios para el armado del pedido y otro con precios para su entrega.
+
+En la tabla \ref{tab:latencias} se presentan las métricas correspondientes a la población de impresión automática.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Latencia de la impresión automática en el nodo de borde.}
+    \label{tab:latencias}
+    \begin{tabular}{l c}
+        \toprule
+        \textbf{Métrica} & \textbf{Valor} \\
+        \midrule
+        Casos analizados & 2569           \\
+        Mínimo           & 0,110 s        \\
+        Media            & 0,425 s        \\
+        Mediana          & 0,338 s        \\
+        Percentil 95     & 0,921 s        \\
+        Percentil 99     & 1,475 s        \\
+        Máximo           & 4,220 s        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+El resultado más significativo no es la mediana sino la dispersión. El peor caso registrado en cincuenta días de operación fue de 4,22 segundos, y la coincidencia entre media y mediana indica una distribución sin cola apreciable. La actuación física del sistema resultó, por lo tanto, no solo rápida sino predecible.
+
+Ese comportamiento es consecuencia directa del criterio de distribución del cómputo. La orden de impresión recorre un único salto dentro de la red del comercio y no atraviesa Internet, de modo que su latencia queda determinada por la red local y por el tiempo de respuesta de la impresora.
+
+\subsection{Composición de la latencia extremo a extremo}
+\label{subsec:composicion_latencia}
+
+La latencia total percibida por el comercio se compone de dos tramos. El primero abarca desde la recepción del mensaje hasta la persistencia del pedido y se resuelve en la nube. El segundo abarca desde la persistencia hasta la emisión del ticket y se resuelve en el borde, con los valores de la sección anterior.
+
+El primer tramo se midió a partir de la duración de las ejecuciones del flujo de interpretación. En la figura \ref{fig:latencia_orquestacion} se presenta su distribución.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{Figures/latencia_orquestacion.pdf}
+    \caption{Distribución de la duración de las ejecuciones del flujo de interpretación de pedidos.}
+    \label{fig:latencia_orquestacion}
+\end{figure}
+
+La distribución vuelve a presentar dos poblaciones separadas por un intervalo vacío. El 47,39 por ciento de las ejecuciones finalizó en menos de cinco segundos y el 52,61 por ciento restante superó los sesenta, sin ningún caso registrado entre ambos valores.
+
+La explicación se encuentra en el mecanismo de agrupación de mensajes descripto en la sección \ref{subsec:criterio_distribucion}. Ese mecanismo no impone una espera fija sino una espera por inactividad. Cada mensaje entrante se incorpora a una lista asociada al cliente y la ejecución aguarda sesenta segundos antes de reevaluar el estado de esa lista. Si durante ese lapso llegó un mensaje posterior, la ejecución concluye sin procesar y delega la interpretación en la ejecución más reciente. Si no llegó ninguno, procede a interpretar el conjunto completo y elimina la lista.
+
+La distribución permite entonces distinguir tres comportamientos. Las 3180 ejecuciones que finalizaron en menos de cinco segundos corresponden a mensajes descartados por los filtros previos, que excluyen los mensajes de grupos y los emitidos por el propio comercio. Las 1744 comprendidas entre sesenta y sesenta y dos segundos corresponden a mensajes sucesivos de un mismo pedido, que concluyeron al detectar la llegada de un mensaje posterior. Las 1786 restantes son las que ejecutaron efectivamente la interpretación, y de ellas 1405 completaron el procesamiento en menos de quince segundos adicionales a la espera, 301 lo hicieron entre quince y sesenta, 79 entre sesenta y doscientos cuarenta, y una sola superó ese valor.
+
+El tiempo de cómputo de la interpretación se ubica, por lo tanto, en el orden de las unidades de segundo. La demora dominante en el tramo que se resuelve en la nube no proviene del procesamiento sino de la espera deliberada por inactividad del cliente.
+
+El contraste entre ambos tramos constituye el resultado central del trabajo. La etapa que depende de servicios remotos admite una espera de sesenta segundos porque su restricción no es de latencia sino de completitud del pedido, mientras que la etapa que ejecuta la actuación física en el borde opera con un máximo de 4,22 segundos y una mediana inferior al medio segundo. La distribución del cómputo asignó a cada entorno la tarea que mejor se ajusta a sus características.
+
+Corresponde señalar una limitación de esta medición. Durante la ventana analizada, 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, lo que arroja una relación de 2,26 ejecuciones por pedido.
+% [PENDIENTE: verificar el origen de esa relación. Hipótesis: no toda
+% conversación procesada deriva en un pedido, ya que las consultas y los mensajes
+% que no constituyen un encargo también superan los filtros previos y ejecutan la
+% interpretación. De confirmarse, corresponde señalar que la duración medida
+% corresponde al procesamiento de una conversación y no necesariamente de un
+% pedido.]
+
+\subsection{Auditoría por formato de entrada}
+\label{subsec:ensayo_formatos}
+
+% [PENDIENTE: ejecutar la auditoría y redactar esta subsección. Ninguna de las
+% fuentes de datos disponibles discrimina el formato del mensaje de origen, y el
+% campo whatsapp_msg conserva el pedido ya estructurado y no el mensaje original,
+% de modo que la comparación entre texto, voz, imagen y documento solo puede
+% obtenerse desde la plataforma de atención vinculada al canal de mensajería.
+%  Procedimiento propuesto, íntegramente de escritorio:
+%   1. Seleccionar cinco pedidos por cada uno de los cuatro formatos admitidos,
+%      recorriendo las conversaciones de la plataforma de atención.
+%   2. Para cada uno, abrir el detalle del pedido en el panel y contrastar los
+%      ítems interpretados contra el contenido del mensaje original.
+%   3. Contabilizar los aciertos de forma independiente en producto, cantidad y
+%      unidad.
+%  Resultado a presentar: una tabla con la exactitud por formato sobre los tres
+%  atributos. El tiempo extremo a extremo por formato no puede medirse, dado que
+%  no se registra el instante de llegada del mensaje, y esa limitación debe
+%  declararse de forma explícita.
+%  Esta subsección es la única evidencia posible del requerimiento 1.2 y
+%  permitiría además confirmar la hipótesis planteada en la sección
+%  \ref{subsec:items_no_reconocidos} sobre la concentración del error residual en
+%  las listas manuscritas.]
+
+\subsection{Trazabilidad del pedido}
+\label{subsec:trazabilidad}
+
+La trazabilidad se verificó de forma estructural. Cada pedido conserva el conjunto de ítems interpretados, con su denominación original cuando no pudieron asociarse al catálogo, el texto exacto enviado a la impresora y el registro completo de los intentos de impresión con su resultado, su marca temporal y su eventual mensaje de error. El panel permite además acceder desde cada pedido al hilo de la conversación que le dio origen.
+
+La consecuencia práctica de ese diseño es que la totalidad de las mediciones presentadas en este capítulo pudo obtenerse a partir de la propia base de datos del sistema, sin instrumentación adicional. La trazabilidad no solo satisface el requerimiento correspondiente, sino que constituyó el instrumento de medición principal del trabajo.
+
+La cadena presenta, sin embargo, una discontinuidad. El mensaje original recibido del cliente no se persiste en la base relacional, que almacena el pedido ya estructurado, sino que permanece únicamente en la plataforma de atención vinculada al canal de mensajería. La reconstrucción del recorrido completo exige, en consecuencia, consultar dos sistemas distintos.
+
+%----------------------------------------------------------------------------------------
+%	SECTION 5
+%----------------------------------------------------------------------------------------
+
+\section{Análisis de resultados}
+\label{sec:analisis_resultados}
+
+\subsection{Verificación de los requerimientos}
+\label{subsec:verificacion_requerimientos}
+
+En la tabla \ref{tab:verificacion} se resume el grado de cumplimiento de los requerimientos verificables mediante los ensayos descriptos.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Verificación de los requerimientos a partir de los ensayos realizados.}
+    \label{tab:verificacion}
+    \begin{tabular}{c p{6.2cm} p{4.6cm}}
+        \toprule
+        \textbf{Req.} & \textbf{Evidencia}                                    & \textbf{Resultado}                                                                              \\
+        \midrule
+        1.2           & Auditoría por formato de entrada                      &                                                                                                 \\
+        1.3           & Tasa de asociación de ítems con el catálogo           & 98,45 por ciento sobre 29457 ítems                                                              \\
+        1.6           & Operaciones de impresión y pedidos sin ticket emitido & 99,49 por ciento sobre 4334 operaciones; 15 pedidos sin ticket, equivalentes al 0,39 por ciento \\
+        1.7           & Episodios de pérdida del vínculo con el borde         & 7 episodios en 50 días, 21 pedidos afectados                                                    \\
+        1.11          & Registro de ítems, ticket e impresiones               & Verificado con una discontinuidad                                                               \\
+        3.1           & Pruebas unitarias automatizadas                       & No implementadas                                                                                \\
+        3.2           & Tasa de error de la orquestación                      & 0,10 por ciento sobre 7036 ejecuciones                                                          \\
+        3.3           & Operación en el comercio durante 75 días              & 3871 pedidos de 202 clientes                                                                    \\
+        3.4           & Impresiones sin fallas atribuibles a la impresora     & Verificado                                                                                      \\
+        3.5           & Latencia de la actuación en el borde                  & Mediana de 0,338 s                                                                              \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Limitaciones detectadas}
+\label{subsec:limitaciones}
+
+El conjunto de ensayos permitió identificar seis limitaciones.
+
+La primera es la dependencia del sistema respecto del estado del catálogo. La cobertura incompleta y la baja de productos vigentes explican 364 de los 458 ítems no asociados, es decir el 79,48 por ciento. El sistema carece de un mecanismo que anticipe esa condición, de modo que la incorporación de productos ocurre siempre con posterioridad al primer pedido que los solicita.
+
+La segunda es la cobertura del catálogo frente a la terminología del comercio mayorista. Las variedades y los códigos de calibre que aparecen en las listas de proveedor no tienen correspondencia en el catálogo, que registra los productos con su nombre genérico, y concentran junto con las denominaciones no interpretables el 41,92 por ciento de los ítems no asociados.
+
+La tercera es la ausencia de un mecanismo de reintento automático de la impresión. Los episodios de pérdida de conectividad dejaron 15 pedidos sin ticket emitido, equivalentes al 0,39 por ciento del total procesado, y su recuperación quedó a cargo del personal, que debió advertir la situación y resolver el armado sin comprobante.
+
+La cuarta es la ausencia de un registro del instante de recepción del mensaje y del formato de origen en la base de datos del sistema. Esa omisión impide medir la latencia extremo a extremo de forma directa y comparar el desempeño entre modalidades de entrada, y obliga a reconstruir el primer tramo a partir del registro de ejecuciones de la orquestación, que se purga cada catorce días. La misma omisión introduce la discontinuidad en la cadena de trazabilidad señalada en la sección \ref{subsec:trazabilidad}.
+
+La quinta es la ausencia de identificación del operador en el registro de impresiones. El campo previsto para ese fin permaneció sin valor en la totalidad de los casos, de modo que la distinción entre la impresión automática y la reimpresión manual debió inferirse a partir de la distribución de las latencias en lugar de leerse de forma directa.
+
+La sexta es la ausencia de pruebas automatizadas, señalada en la sección \ref{subsec:estrategia_verificacion}, que impide detectar regresiones de manera anticipada.
+
+\subsection{Mejoras propuestas}
+\label{subsec:mejoras_ensayos}
+
+De las limitaciones anteriores se desprenden seis mejoras concretas, que se retoman en el capítulo \ref{Chapter5}.
+
+La primera es la incorporación al panel de una vista específica de ítems no asociados, ordenada por frecuencia, que permita al personal dar de alta los productos faltantes de forma sistemática en lugar de reactiva. La medición indica que 123 de los 458 casos, equivalentes al 0,42 por ciento de los ítems procesados, se habrían evitado mediante la incorporación oportuna de productos que luego se dieron de alta o que se encontraban dados de baja. Corresponde asimismo revisar el criterio de baja de productos, ya que los clientes aún solicitan artículos que fueron desactivados.
+
+La segunda es la incorporación al catálogo de las variedades comerciales y de los códigos de calibre empleados por los proveedores, junto con su vinculación al producto genérico correspondiente. Esa ampliación permitiría interpretar las listas de proveedor con el mismo nivel de precisión que los pedidos de los clientes minoristas.
+
+La tercera es la implementación de una cola de impresiones pendientes, con reintento automático al restablecerse el vínculo. Los episodios registrados muestran que la indisponibilidad del enlace se resuelve por sí sola en plazos acotados, de modo que un reintento diferido habría emitido los 15 tickets faltantes sin intervención del personal. Se trata de la mejora de mayor impacto sobre la confiabilidad percibida del sistema.
+
+La cuarta es la incorporación del instante de recepción del mensaje, del formato de origen y de una referencia al mensaje original a la tabla de pedidos. Esa modificación permitiría medir la latencia extremo a extremo y el desempeño por formato de manera permanente, y cerraría la discontinuidad de la cadena de trazabilidad.
+
+La quinta es el registro efectivo del operador que dispara cada impresión desde el panel, lo que separaría de forma explícita las dos poblaciones que este capítulo debió distinguir por inferencia.
+
+La sexta es la revisión del intervalo de espera por inactividad. La medición demostró que el tiempo de interpretación se ubica en el orden de las unidades de segundo, muy por debajo de los sesenta segundos que dura cada ciclo de espera. Dado que 1744 de las 3530 ejecuciones que ingresaron al mecanismo concluyeron sin procesar por la llegada de un mensaje posterior, la reducción del intervalo disminuiría la latencia percibida en los pedidos enviados en un único mensaje sin afectar la correcta agrupación de los pedidos fragmentados. Una medición previa de la distribución del tiempo entre mensajes sucesivos de un mismo cliente permitiría ajustar ese valor con fundamento empírico.
