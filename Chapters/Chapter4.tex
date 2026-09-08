@@ -25,7 +25,7 @@ El sistema entró en operación el 1 de junio de 2026 y el primer pedido quedó 
 
 Las mediciones no cubren todas un mismo intervalo, ya que cada subsistema conserva su información durante un lapso distinto. En la tabla \ref{tab:ventanas} se detallan las tres ventanas empleadas y el motivo de su extensión.
 
-\begin{table}[htbp]
+\begin{table}[H]
     \centering
     \caption{Ventanas de medición empleadas en los ensayos.}
     \label{tab:ventanas}
@@ -62,7 +62,7 @@ La tercera es la plataforma de atención vinculada al canal de mensajería, que 
 
 Los requerimientos de testing previeron la ejecución de pruebas unitarias sobre los módulos de procesamiento e impresión y de pruebas de integración entre los componentes. La revisión del repositorio confirmó que no se implementaron conjuntos de pruebas automatizadas, más allá del archivo de ejemplo que genera el entorno de desarrollo del panel, que no contiene casos de prueba.
 
-En su reemplazo, la verificación se apoyó en la operación real del sistema durante 75 días. Esa estrategia aporta una cobertura de casos superior a la que habría alcanzado un conjunto de pruebas construido para la ocasión, con la variabilidad propia de los mensajes de clientes reales, y permite validar de forma simultánea la integración de todos los componentes. Su limitación es que no detecta regresiones de manera anticipada ni permite aislar la causa de una falla en un componente determinado, motivo por el cual la incorporación de pruebas automatizadas se propone como trabajo futuro en el capítulo \ref{Chapter5}.
+En su reemplazo, la verificación se apoyó en la operación real del sistema durante 75 días. Esa estrategia aporta una cobertura de casos superior a la que habría alcanzado un conjunto de pruebas construido para la ocasión, con la variabilidad propia de los mensajes de clientes reales, y permite validar de forma simultánea la integración de todos los componentes. Su limitación es que no detecta regresiones de manera anticipada ni permite aislar la causa de una falla en un componente determinado, motivo por el que la incorporación de pruebas automatizadas se propone como trabajo futuro en el capítulo \ref{Chapter5}.
 
 \subsection{Criterios de evaluación}
 \label{subsec:criterios}
@@ -83,9 +83,9 @@ Los ensayos de conectividad se orientaron a verificar el vínculo entre la nube 
 \subsection{Confiabilidad del vínculo en operación}
 \label{subsec:confiabilidad_vinculo}
 
-El análisis distingue el período de prueba de la impresora del período de operación automática, ya que las condiciones difieren por completo. Durante las cuatro primeras semanas, cuando el comercio aún no contaba con el equipo, se registraron 39 operaciones de impresión de las cuales 13 finalizaron con error. Esos casos carecen de valor para evaluar la confiabilidad del vínculo, dado que el destino de la orden no existía.
+El análisis distingue el período de prueba de la impresora del período de operación automática, ya que las condiciones difieren por completo. Durante las cuatro primeras semanas, cuando el comercio aún no contaba con el equipo, se registraron 39 operaciones de impresión, de las que 13 finalizaron con error. Esos casos carecen de valor para evaluar la confiabilidad del vínculo, dado que el destino de la orden no existía.
 
-Durante el período de operación automática, comprendido entre el 29 de junio y el 17 de agosto, se registraron 4334 operaciones de impresión de las cuales 22 finalizaron con error, lo que arroja una tasa de fallas del 0,51 por ciento.
+Durante el período de operación automática, comprendido entre el 29 de junio y el 17 de agosto, se registraron 4334 operaciones de impresión, de las que 22 finalizaron con error, lo que arroja una tasa de fallas del 0,51 por ciento.
 En la tabla \ref{tab:errores_conectividad} se detalla la clasificación de los errores del período de operación automática según su mensaje y su origen.
 
 \begin{table}[htbp]
@@ -138,7 +138,7 @@ La distribución temporal de los errores resultó más informativa que su recuen
 
 Los dos episodios prolongados concentran 14 de los 21 pedidos afectados y presentan un patrón coherente con una interrupción del servicio de Internet en el comercio: fallas consecutivas sobre pedidos distintos, mismo código de error y cese simultáneo al finalizar el episodio. Los casos aislados se resolvieron en plazos que van de los 12 segundos a las 16 horas.
 
-El resultado exige una precisión que corrige la lectura inicial de estos datos. El registro de impresiones incorpora un campo mediante el cual el personal marca un error como atendido, y la totalidad de los casos figura con esa marca. Sin embargo, la verificación de las impresiones anteriores y posteriores a cada error muestra un panorama distinto. Tres de los pedidos afectados ya contaban con un ticket emitido, de modo que la falla se produjo sobre una reimpresión. Otros tres recibieron su ticket con posterioridad al episodio. Los 15 restantes no registran ninguna emisión exitosa, lo que representa el 0,39 por ciento de los 3871 pedidos procesados durante el período. La marca de atención refleja, por lo tanto, la resolución operativa del caso por parte del personal, que consultó el pedido en el panel y lo armó sin comprobante impreso, y no la emisión efectiva del ticket.
+El resultado exige una precisión que corrige la lectura inicial de estos datos. El registro de impresiones incorpora un campo con el que el personal marca un error como atendido, y la totalidad de los casos figura con esa marca. Sin embargo, la verificación de las impresiones anteriores y posteriores a cada error muestra un panorama distinto. Tres de los pedidos afectados ya contaban con un ticket emitido, de modo que la falla se produjo sobre una reimpresión. Otros tres recibieron su ticket con posterioridad al episodio. Los 15 restantes no registran ninguna emisión exitosa, lo que representa el 0,39 por ciento de los 3871 pedidos procesados durante el período. La marca de atención refleja, por lo tanto, la resolución operativa del caso por parte del personal, que consultó el pedido en el panel y lo armó sin comprobante impreso, y no la emisión efectiva del ticket.
 
 La consecuencia de diseño es doble. Por un lado, la indisponibilidad del vínculo no interrumpe la operación del comercio, ya que el pedido permanece accesible en el panel con la totalidad de su información y el personal puede continuar el armado. Por el otro, el sistema carece de un mecanismo de reintento automático que emita los tickets pendientes al restablecerse el enlace, de modo que la recuperación depende de que el personal advierta la situación. Los episodios registrados muestran que el enlace se restablece por sí solo en plazos acotados, lo que vuelve viable la mejora propuesta en la sección \ref{subsec:mejoras_ensayos}.
 
