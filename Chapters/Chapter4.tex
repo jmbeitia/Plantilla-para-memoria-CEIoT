@@ -55,7 +55,7 @@ La primera es la base de datos relacional del sistema, que registra cada pedido,
 
 La segunda es el registro de ejecuciones de la plataforma de orquestación, que conserva el instante de inicio y de finalización de cada flujo junto con su estado final. Esa información permite acotar el tiempo de interpretación, que no queda registrado en la base relacional del sistema.
 
-La tercera es un conjunto de ensayos controlados ejecutados en el comercio, con envío deliberado de pedidos en cada uno de los formatos admitidos y con interrupciones provocadas de la conectividad. Estos ensayos cubren las dimensiones que las fuentes anteriores no permiten discriminar, que son la comparación entre formatos de entrada y el comportamiento del sistema ante una caída del enlace.
+La tercera es la plataforma de atención vinculada al canal de mensajería, que conserva cada mensaje entrante con su marca temporal, su contacto de origen y el tipo de contenido de sus adjuntos. Esa fuente aporta la única información disponible sobre el formato del mensaje original, dimensión que las dos anteriores no permiten discriminar, y sostiene la auditoría de la sección \ref{subsec:ensayo_formatos}. Su vinculación con los pedidos no es directa, ya que ambos sistemas no comparten identificadores, y debió reconstruirse por coincidencia del número de contacto y proximidad temporal según el procedimiento que allí se detalla.
 
 \subsection{Estrategia de verificación adoptada}
 \label{subsec:estrategia_verificacion}
@@ -163,7 +163,7 @@ La magnitud de la muestra resulta relevante para la interpretación del resultad
 \subsection{Análisis de los ítems no reconocidos}
 \label{subsec:items_no_reconocidos}
 
-Las denominaciones no asociadas se clasificaron mediante su normalización, con supresión de tildes y unificación de mayúsculas, y su posterior comparación contra el catálogo de productos. El análisis permite distinguir seis situaciones de naturaleza distinta, que se detallan en la tabla \ref{tab:no_reconocidos}.
+Las denominaciones no asociadas se clasificaron mediante su normalización, con supresión de tildes y unificación de mayúsculas, y su posterior comparación contra el catálogo de productos. El análisis permite distinguir ocho situaciones de naturaleza distinta, que se detallan en la tabla \ref{tab:no_reconocidos}.
 
 \begin{table}[htbp]
     \centering
@@ -189,12 +189,9 @@ Las denominaciones no asociadas se clasificaron mediante su normalización, con 
 
 La primera situación reúne nombres de variedad y códigos de calibre propios del comercio mayorista de frutas. Las variedades de mandarina Ellendale y Encore concentran 38 casos y la variedad de pera Bosc concentra 18, a los que se suman numerosas denominaciones que combinan variedad, tipo de envase y calibre. Ninguna de ellas integra el catálogo del comercio, que registra los productos con su nombre genérico.
 
-La forma en que esas denominaciones quedaron registradas resulta significativa. La variedad Ellendale aparece bajo nueve escrituras distintas y la variedad Bosc bajo quince, con deformaciones progresivas que se extienden hasta las 68 denominaciones agrupadas como carentes de correspondencia interpretable. El patrón sugiere que el conjunto proviene de la lectura de listas manuscritas con terminología ausente del catálogo, situación en la que el agente carece de referencia para normalizar aquello que interpreta.
-% [PENDIENTE: la atribución a la modalidad de imagen manuscrita constituye una
-% inferencia a partir de la morfología de los errores, ya que el formato del
-% mensaje de origen no se registra. El ensayo por formato de la sección
-% \ref{subsec:ensayo_formatos} permitiría confirmarla. Si no se ejecuta, este
-% párrafo debe presentarse de forma explícita como hipótesis.]
+La forma en que esas denominaciones quedaron registradas resulta significativa. La variedad Ellendale aparece bajo nueve escrituras distintas y la variedad Bosc bajo quince, con deformaciones progresivas del tipo \emph{Boschi}, \emph{Boscoli} o \emph{Boschaitis}, que se prolongan hasta el grupo de denominaciones carentes de correspondencia interpretable, integrado por 80 casos repartidos en 68 escrituras distintas. La morfología de esas deformaciones es la propia de una transcripción, y no la de un error de tipeo, lo que sugiere que el conjunto proviene de la lectura de listas con terminología ausente del catálogo, situación en la que el agente carece de referencia para normalizar aquello que interpreta.
+
+Esa lectura constituye una hipótesis sobre el origen del error y no un resultado medido. La auditoría por formato de entrada de la sección \ref{subsec:ensayo_formatos} fue diseñada para contrastarla y no la confirma: la tasa de asociación no presenta diferencias apreciables entre los formatos de entrada, de modo que el error residual no se concentra en la modalidad de imagen. Lo que sí distingue a esa modalidad es el tamaño del pedido, según se analiza en dicha sección.
 
 La segunda situación agrupa 94 ítems correspondientes a productos que no integraban el catálogo en el momento del pedido y que fueron incorporados con posterioridad. El caso más ilustrativo es el del huevo, con 55 ocurrencias registradas entre el 10 de junio y el 12 de julio. Ese último día el producto se dio de alta y a partir de entonces no se registró ningún fallo adicional. El patrón se repite en el resto del grupo y evidencia un mecanismo de realimentación operativa: los ítems no reconocidos que el panel destaca orientaron la ampliación progresiva del catálogo por parte del personal del comercio.
 
@@ -233,10 +230,7 @@ Sobre 7036 ejecuciones se registraron 7 fallas, lo que arroja una tasa de error 
 
 La duración media del flujo de interpretación no debe leerse como tiempo de procesamiento, según se analiza en la sección \ref{subsec:composicion_latencia}.
 
-El flujo de sincronización de contactos presenta una duración media del orden de la hora, con trece ejecuciones en catorce días. Se trata de un proceso programado que opera de forma desacoplada del flujo de pedidos y que, por lo tanto, no incide sobre la latencia percibida por el comercio.
-% [PENDIENTE: el flujo de sincronización de contactos no fue descripto en el
-% capítulo 3. Corresponde documentarlo allí o justificar su omisión, ya que
-% aparece en las mediciones de este capítulo.]
+El flujo de sincronización de contactos, que actualiza de forma programada los nombres de los clientes a partir de la agenda del comercio, presenta una duración media del orden de la hora, con trece ejecuciones en catorce días. Ese valor no refleja un costo de cómputo sino las esperas deliberadas que el flujo intercala entre lotes para respetar los límites de tasa de las interfaces que consume. Al operar de forma desacoplada del flujo de pedidos, no incide sobre la latencia percibida por el comercio.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 4
@@ -312,37 +306,64 @@ El tiempo de cómputo de la interpretación se ubica, por lo tanto, en el orden 
 
 El contraste entre ambos tramos constituye el resultado central del trabajo. La etapa que depende de servicios remotos admite una espera de sesenta segundos porque su restricción no es de latencia sino de completitud del pedido, mientras que la etapa que ejecuta la actuación física en el borde opera con un máximo de 4,22 segundos y una mediana inferior al medio segundo. La distribución del cómputo asignó a cada entorno la tarea que mejor se ajusta a sus características.
 
-Corresponde señalar una limitación de esta medición. Durante la ventana analizada, 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, lo que arroja una relación de 2,26 ejecuciones por pedido.
-% [PENDIENTE: verificar el origen de esa relación. Hipótesis: no toda
-% conversación procesada deriva en un pedido, ya que las consultas y los mensajes
-% que no constituyen un encargo también superan los filtros previos y ejecutan la
-% interpretación. De confirmarse, corresponde señalar que la duración medida
-% corresponde al procesamiento de una conversación y no necesariamente de un
-% pedido.]
+Corresponde precisar qué unidad mide esta distribución. Durante la ventana analizada, 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, lo que arroja una relación de 2,26 ejecuciones por pedido. El origen de esa relación se verificó reconstruyendo, sobre el registro de la plataforma de atención, las agrupaciones de mensajes que el mecanismo de espera por inactividad habría formado en esa misma ventana. Aplicando el criterio de corte de sesenta segundos a los 3386 mensajes entrantes recibidos de contactos individuales, la reconstrucción arroja 1893 agrupaciones; con un corte de noventa segundos, que absorbe la latencia de ingreso de cada mensaje, arroja 1801. Ese valor difiere en menos del uno por ciento de las 1786 ejecuciones que efectivamente interpretaron.
+
+La coincidencia establece que cada ejecución de interpretación corresponde a una conversación agrupada y no a un pedido. Las 997 conversaciones restantes son intercambios que superaron los filtros previos pero no derivaron en un encargo, como consultas de precio, confirmaciones y saludos. La duración medida es, en consecuencia, la del procesamiento de una conversación, y el sistema resuelve algo más del doble de conversaciones que de pedidos.
 
 \subsection{Auditoría por formato de entrada}
 \label{subsec:ensayo_formatos}
 
-% [PENDIENTE: ejecutar la auditoría y redactar esta subsección. Ninguna de las
-% fuentes de datos disponibles discrimina el formato del mensaje de origen, y el
-% campo whatsapp_msg conserva el pedido ya estructurado y no el mensaje original,
-% de modo que la comparación entre texto, voz, imagen y documento solo puede
-% obtenerse desde la plataforma de atención vinculada al canal de mensajería.
-%  Procedimiento propuesto, íntegramente de escritorio:
-%   1. Seleccionar cinco pedidos por cada uno de los cuatro formatos admitidos,
-%      recorriendo las conversaciones de la plataforma de atención.
-%   2. Para cada uno, abrir el detalle del pedido en el panel y contrastar los
-%      ítems interpretados contra el contenido del mensaje original.
-%   3. Contabilizar los aciertos de forma independiente en producto, cantidad y
-%      unidad.
-%  Resultado a presentar: una tabla con la exactitud por formato sobre los tres
-%  atributos. El tiempo extremo a extremo por formato no puede medirse, dado que
-%  no se registra el instante de llegada del mensaje, y esa limitación debe
-%  declararse de forma explícita.
-%  Esta subsección es la única evidencia posible del requerimiento 1.2 y
-%  permitiría además confirmar la hipótesis planteada en la sección
-%  \ref{subsec:items_no_reconocidos} sobre la concentración del error residual en
-%  las listas manuscritas.]
+El requerimiento de admitir pedidos en texto, voz, imagen y documento exige comparar el comportamiento del sistema entre esas cuatro modalidades. Ninguna de las dos primeras fuentes de medición lo permite, ya que la base relacional conserva el pedido ya estructurado y no el mensaje que lo originó. La comparación se construyó, en consecuencia, sobre el registro de la plataforma de atención, que sí conserva el tipo de contenido de cada mensaje entrante.
+
+\subsubsection*{Reconstrucción del vínculo entre mensaje y pedido}
+
+Los dos sistemas no comparten identificadores, de modo que la correspondencia entre un mensaje y el pedido que produjo debió reconstruirse. El procedimiento aprovecha el mecanismo de agrupación por inactividad descripto en la sección \ref{subsec:composicion_latencia}: dado que el flujo persiste el pedido una vez transcurrida la espera sin nuevos mensajes, todo pedido debe estar precedido por un mensaje del mismo contacto a una distancia próxima a esa espera. Se emparejó entonces cada pedido con el último mensaje entrante recibido del mismo número de contacto con anterioridad a su registro.
+
+La distribución de esas distancias confirma la validez del emparejamiento. La mediana es de 72 segundos, con un primer cuartil de 68 y un tercer cuartil de 85, valores que reproducen la espera de sesenta segundos más el tiempo de procesamiento. Se consideraron atribuibles los pedidos cuyo mensaje precedente se ubica a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana, es decir el 78,48 por ciento. Para cada uno de ellos se reconstruyó además la agrupación completa, encadenando hacia atrás los mensajes separados por menos de noventa segundos, y se asignó al pedido el formato de los adjuntos presentes en esa agrupación.
+
+La cobertura del emparejamiento se mantiene estable a lo largo de todo el período, con una mediana diaria del 79 por ciento y un mínimo del 61 por ciento, sin días de cobertura anómala. Esa uniformidad permite descartar que el subconjunto atribuido corresponda a un tramo particular de la operación y sostiene su uso como muestra del conjunto.
+
+\subsubsection*{Composición del tráfico y resultados por formato}
+
+Durante la ventana de 75 días se recibieron 16619 mensajes entrantes de contactos individuales, de los cuales el 77,39 por ciento fue texto, el 12,41 por ciento audio, el 8,29 por ciento imagen, el 1,78 por ciento documento y el 0,14 por ciento video. Las cuatro modalidades previstas por el requerimiento se presentan, por lo tanto, en la operación real y con volumen suficiente para ser comparadas, con la salvedad del video, cuya presencia es marginal.
+
+En la tabla \ref{tab:formatos} se presentan los resultados de la auditoría sobre los 3038 pedidos atribuidos. La categoría mixta reúne los pedidos cuya agrupación combina adjuntos de más de un tipo.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Auditoría por formato de entrada sobre los pedidos atribuidos.}
+    \label{tab:formatos}
+    \begin{tabular}{l c c c c c}
+        \toprule
+        \textbf{Formato} & \textbf{Pedidos} & \textbf{\%} & \textbf{Ítems} & \textbf{Tasa de asociación} & \textbf{Ítems/pedido} \\
+        \midrule
+        Texto     & 2013 & 66,26 & 12060 & 99,17 & 5,99  \\
+        Audio     & 563  & 18,53 & 2952  & 99,32 & 5,24  \\
+        Imagen    & 405  & 13,33 & 4727  & 99,30 & 11,67 \\
+        Mixto     & 40   & 1,32  & 321   & 98,75 & 8,03  \\
+        Documento & 16   & 0,53  & 424   & 98,11 & 26,50 \\
+        Video     & 1    & 0,03  & 1     & 100,00 & 1,00 \\
+        \midrule
+        Total     & 3038 & 100,00 & 20485 & 99,19 & 6,74 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+El resultado principal es la ausencia de diferencias apreciables en la tasa de asociación entre las tres modalidades de volumen significativo. El texto alcanza el 99,17 por ciento, el audio el 99,32 y la imagen el 99,30, valores comprendidos en un intervalo de 0,15 puntos porcentuales. El documento presenta el valor más bajo, 98,11 por ciento, pero sobre una base de 16 pedidos que no admite generalización. La interpretación multimodal no introduce, en consecuencia, una penalización medible respecto del texto plano, que constituye el resultado de mayor relevancia para el requerimiento.
+
+El segundo resultado es que el formato sí determina el tamaño del pedido. Un pedido enviado por texto contiene en promedio 5,99 ítems y uno enviado por audio 5,24, mientras que uno enviado por imagen contiene 11,67 y uno enviado como documento 26,50. Las modalidades de imagen y documento concentran los pedidos extensos, que son los que el comercio recibe como lista completa de reposición, y su aporte al volumen total de ítems resulta muy superior al que sugiere su participación en la cantidad de pedidos: la imagen representa el 13,33 por ciento de los pedidos pero el 23,08 por ciento de los ítems.
+
+La combinación de ambos resultados corrige la lectura planteada como hipótesis en la sección \ref{subsec:items_no_reconocidos}. El error residual no se concentra en la modalidad de imagen. Lo que la imagen concentra son los pedidos extensos con terminología de proveedor, de modo que la asociación entre listas manuscritas y denominaciones no interpretables responde al contenido de esos pedidos y no a una degradación de la interpretación por el hecho de provenir de una fotografía.
+
+\subsubsection*{Limitaciones de la auditoría}
+
+Tres limitaciones acotan el alcance de estos resultados y deben declararse de forma explícita.
+
+La primera es que el indicador empleado es la tasa de asociación de los ítems con el catálogo, no la exactitud de la interpretación. Un ítem asociado a un producto puede haber sido interpretado con una cantidad o una unidad incorrectas, y ese error no queda registrado en ninguna de las fuentes disponibles. La verificación de los tres atributos de manera independiente exigiría contrastar cada pedido contra el contenido del mensaje original, tarea que sobre el volumen analizado solo sería viable por muestreo manual.
+
+La segunda es que el tiempo extremo a extremo no puede desagregarse por formato. El instante de llegada del mensaje se conserva en la plataforma de atención y el de persistencia del pedido en la base relacional, pero el registro de ejecuciones no discrimina la modalidad procesada, de modo que no es posible aislar el costo de la transcripción de audio o de la lectura de imagen dentro de la latencia total.
+
+La tercera es que el 21,52 por ciento de los pedidos de la ventana no pudo atribuirse a ningún mensaje próximo. Ese conjunto presenta pedidos de mayor tamaño, con 10,78 ítems por pedido, y una tasa de asociación inferior, del 96,75 por ciento, de modo que su exclusión eleva el valor global de la muestra auditada por encima del 98,45 por ciento del conjunto completo. La comparación entre formatos no resulta afectada, ya que el sesgo opera sobre todas las modalidades por igual, pero los valores absolutos de la tabla \ref{tab:formatos} no deben leerse como la tasa de asociación del sistema, que es la reportada en la sección \ref{subsec:items_no_reconocidos}.
 
 \subsection{Trazabilidad del pedido}
 \label{subsec:trazabilidad}
@@ -373,7 +394,7 @@ En la tabla \ref{tab:verificacion} se resume el grado de cumplimiento de los req
         \toprule
         \textbf{Req.} & \textbf{Evidencia}                                    & \textbf{Resultado}                                                                              \\
         \midrule
-        1.2           & Auditoría por formato de entrada                      &                                                                                                 \\
+        1.2           & Auditoría por formato de entrada                      & Cuatro formatos en operación; tasa de asociación entre 99,17 y 99,32 por ciento sin diferencia entre texto, audio e imagen \\
         1.3           & Tasa de asociación de ítems con el catálogo           & 98,45 por ciento sobre 29457 ítems                                                              \\
         1.6           & Operaciones de impresión y pedidos sin ticket emitido & 99,49 por ciento sobre 4334 operaciones; 15 pedidos sin ticket, equivalentes al 0,39 por ciento \\
         1.7           & Episodios de pérdida del vínculo con el borde         & 7 episodios en 50 días, 21 pedidos afectados                                                    \\
@@ -392,9 +413,9 @@ En la tabla \ref{tab:verificacion} se resume el grado de cumplimiento de los req
 
 El conjunto de ensayos permitió identificar seis limitaciones.
 
-La primera es la dependencia del sistema respecto del estado del catálogo. La cobertura incompleta y la baja de productos vigentes explican 364 de los 458 ítems no asociados, es decir el 79,48 por ciento. El sistema carece de un mecanismo que anticipe esa condición, de modo que la incorporación de productos ocurre siempre con posterioridad al primer pedido que los solicita.
+La primera es la dependencia del sistema respecto del estado del catálogo. La cobertura incompleta y la baja de productos vigentes explican 364 de los 458 ítems no asociados, es decir el 79,48 por ciento. Ese conjunto reúne los productos incorporados con posterioridad, los de almacén y los frescos ausentes, los dados de baja y las variedades comerciales y códigos de calibre, que se retoman en la limitación siguiente por constituir un caso de naturaleza propia dentro de esa misma causa. El sistema carece de un mecanismo que anticipe esa condición, de modo que la incorporación de productos ocurre siempre con posterioridad al primer pedido que los solicita.
 
-La segunda es la cobertura del catálogo frente a la terminología del comercio mayorista. Las variedades y los códigos de calibre que aparecen en las listas de proveedor no tienen correspondencia en el catálogo, que registra los productos con su nombre genérico, y concentran junto con las denominaciones no interpretables el 41,92 por ciento de los ítems no asociados.
+La segunda es la cobertura del catálogo frente a la terminología del comercio mayorista. Las variedades y los códigos de calibre que aparecen en las listas de proveedor no tienen correspondencia en el catálogo, que registra los productos con su nombre genérico, y concentran 112 casos. Sumados a las 80 denominaciones sin correspondencia interpretable, que no responden a la cobertura del catálogo sino a la lectura del mensaje de origen, alcanzan el 41,92 por ciento de los ítems no asociados. La distinción es relevante porque ambos grupos exigen medidas distintas: los primeros se resuelven ampliando el catálogo, mientras que los segundos dependen de la calidad del mensaje recibido.
 
 La tercera es la ausencia de un mecanismo de reintento automático de la impresión. Los episodios de pérdida de conectividad dejaron 15 pedidos sin ticket emitido, equivalentes al 0,39 por ciento del total procesado, y su recuperación quedó a cargo del personal, que debió advertir la situación y resolver el armado sin comprobante.
 

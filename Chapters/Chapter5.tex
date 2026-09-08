@@ -4,35 +4,87 @@
 \chapter{Conclusiones} % Main chapter title
 
 \label{Chapter5} % Change X to a consecutive number; for referencing this chapter elsewhere, use \ref{ChapterX}
-Todos los capítulos deben comenzar con un breve párrafo introductorio que indique cuál es el contenido que se encontrará al leerlo.  La redacción sobre el contenido de la memoria debe hacerse en presente y todo lo referido al proyecto en pasado, siempre de modo impersonal.
 
-
-%----------------------------------------------------------------------------------------
+En el presente capítulo se valora el trabajo realizado a la luz de los objetivos planteados y de la evidencia reunida en el capítulo \ref{Chapter4}. Se analiza el grado de cumplimiento de los requerimientos, la fidelidad de la ejecución respecto de la planificación original, el comportamiento de los riesgos identificados y la utilidad de las técnicas empleadas. El capítulo cierra con las líneas de trabajo que se desprenden de los resultados obtenidos.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
 %----------------------------------------------------------------------------------------
 
-\section{Conclusiones generales }
+\section{Conclusiones generales}
 
-La idea de esta sección es resaltar cuáles son los principales aportes del trabajo realizado y cómo se podría continuar. Debe ser especialmente breve y concisa. Es buena idea usar un listado para enumerar los logros obtenidos.
+El trabajo produjo un sistema que se encuentra en operación continua en el comercio para el que fue concebido. Esa circunstancia constituye el principal aporte, ya que los resultados presentados no provienen de un banco de pruebas sino del uso sostenido por parte de sus destinatarios durante 75 días, con 3871 pedidos de 202 clientes y 29457 ítems interpretados.
 
-En esta sección no se deben incluir ni tablas ni gráficos.
+\subsection{Grado de cumplimiento de los objetivos}
 
-Algunas preguntas que pueden servir para completar este capítulo:
+Los objetivos específicos formulados en la sección \ref{sec:objetivos} se alcanzaron en su totalidad. Los logros concretos son los siguientes:
 
 \begin{itemize}
-\item ¿Cuál es el grado de cumplimiento de los requerimientos?
-\item ¿Cuán fielmente se puedo seguir la planificación original (cronograma incluido)?
-\item ¿Se manifestó algunos de los riesgos identificados en la planificación? ¿Fue efectivo el plan de mitigación? ¿Se debió aplicar alguna otra acción no contemplada previamente?
-\item Si se debieron hacer modificaciones a lo planificado ¿Cuáles fueron las causas y los efectos?
-\item ¿Qué técnicas resultaron útiles para el desarrollo del proyecto y cuáles no tanto?
+	\item Se automatizó la captura de pedidos en las cuatro modalidades que el canal admite. La auditoría de la sección \ref{subsec:ensayo_formatos} verificó que texto, audio e imagen se interpretan con tasas de asociación comprendidas entre el 99,17 y el 99,32 por ciento, sin penalización medible de las modalidades multimodales respecto del texto plano.
+	\item Se alcanzó una tasa de asociación de ítems con el catálogo del 98,45 por ciento sobre 29457 ítems, y el análisis de los 458 casos restantes demostró que el 79,48 por ciento de ellos responde a limitaciones de cobertura del catálogo y no a errores de interpretación.
+	\item Se implementó la trazabilidad completa del pedido, que resultó suficiente para obtener la totalidad de las mediciones de este trabajo sin instrumentación adicional.
+	\item Se automatizó la impresión en el borde con una latencia de mediana 0,338 segundos y máximo 4,22 segundos, sobre 4334 operaciones con una tasa de éxito del 99,49 por ciento.
+	\item Se estableció la comunicación segura entre la nube y el nodo de borde mediante un túnel, cuyo comportamiento se caracterizó en 7 episodios de indisponibilidad a lo largo de 50 días.
+	\item Se construyó el panel web, que se incorporó a la operación diaria y que además habilitó el mecanismo de realimentación del catálogo descripto más adelante.
+	\item Se validó el sistema en condiciones reales, criterio de aceptación que operó de manera efectiva mediante el uso sostenido por parte del comercio.
 \end{itemize}
 
+De los requerimientos verificados en la sección \ref{subsec:verificacion_requerimientos}, uno solo no se satisfizo: el que preveía la implementación de pruebas unitarias automatizadas. La verificación se resolvió en su reemplazo mediante la operación real, estrategia que aportó una cobertura de casos superior pero que no detecta regresiones de manera anticipada ni permite aislar la causa de una falla. La incorporación de esas pruebas queda como la deuda técnica más relevante del trabajo. Un segundo requerimiento, el de trazabilidad, se verificó con una salvedad: el mensaje original no se persiste en la base relacional, de modo que la reconstrucción del recorrido completo exige consultar dos sistemas distintos.
+
+\subsection{Fidelidad respecto de la planificación}
+
+La ejecución se apartó de la planificación en el ordenamiento de las etapas antes que en su contenido. El historial del repositorio de desarrollo sitúa el inicio de la construcción el 20 de abril de 2026 y su última intervención el 1 de septiembre del mismo año. La actividad no se distribuyó de manera uniforme: se concentró en una primera etapa intensiva durante la segunda quincena de abril, en la que quedó definida la arquitectura, y en un segundo bloque durante junio, que absorbió la mayor parte del desarrollo del panel web. Los meses posteriores registran intervenciones puntuales de ajuste sobre la interfaz de programación y sobre los flujos de orquestación. Corresponde advertir que la frecuencia de las confirmaciones del repositorio documenta la cronología de la construcción, pero no constituye una medida del esfuerzo dedicado, de modo que no permite contrastar el total contra las 600 horas previstas en la planificación.
+
+La desviación de mayor consecuencia fue deliberada y consistió en adelantar la puesta en producción respecto del final del desarrollo. El sistema entró en operación el 1 de junio de 2026 y registró su primer pedido el 4 de junio, cuando el panel web todavía se encontraba en construcción y el comercio aún no contaba con la impresora térmica. Durante las cuatro primeras semanas la capa de captura e interpretación operó con el volumen completo de pedidos mientras los resultados se volcaban a un archivo de texto que el personal consultaba de forma manual. La automatización de la impresión se habilitó recién el 29 de junio, una vez verificada la calidad de la interpretación.
+
+El efecto de esa decisión fue favorable en dos sentidos. Redujo el riesgo de la puesta en marcha, ya que ningún fallo de interpretación pudo traducirse en un ticket erróneo durante el período de observación, y aportó cuatro semanas de datos reales que orientaron la ampliación del catálogo antes de que el sistema operara de forma autónoma. Su costo fue una mayor carga operativa para el personal durante ese lapso.
+
+\subsection{Comportamiento de los riesgos identificados}
+
+De los cinco riesgos previstos en la planificación, dos se manifestaron durante el período de operación.
+
+El riesgo de fallas de integración entre la plataforma de orquestación, la interfaz de programación y los servicios de inteligencia artificial no se materializó. Sobre 7036 ejecuciones se registraron 7 fallas, equivalentes al 0,10 por ciento, y cada una de esas ejecuciones involucra a la totalidad de los componentes de la cadena.
+
+El riesgo de caídas del servidor local de impresión sí se manifestó, y constituye el caso en que el plan de mitigación resultó inefectivo por no haberse implementado. Se registraron 7 episodios de pérdida del vínculo en 50 días, que afectaron a 21 pedidos y dejaron 15 sin ticket emitido, equivalentes al 0,39 por ciento de los procesados. La mitigación prevista consistía en un mecanismo de supervisión y reinicio automático del proceso en el nodo de borde, que no llegó a incorporarse. La resolución quedó en consecuencia a cargo del personal, que debió advertir la falta del comprobante y armar el pedido consultando el panel. Corresponde señalar que la evidencia recogida sugiere una mitigación más adecuada que la prevista: dado que la indisponibilidad se resuelve por sí sola en plazos acotados, una cola de reintentos en la nube habría emitido los 15 tickets faltantes sin intervención alguna, y lo habría hecho con independencia de la causa de la caída.
+
+El riesgo de baja calidad de los mensajes recibidos se manifestó de forma parcial y con un alcance menor al previsto. Los 458 ítems que el sistema no pudo asociar representan el 1,55 por ciento del total, y de ellos solo 80 corresponden a denominaciones sin correspondencia interpretable. La auditoría por formato demostró además que ese error residual no depende de la modalidad del mensaje, de modo que la interpretación multimodal resultó más robusta de lo que la planificación anticipaba. La mitigación efectiva no fue ninguna de las previstas, sino un mecanismo emergente que se describe en el apartado siguiente.
+
+El riesgo de pérdida de datos en la base no se manifestó. No se detectaron inconsistencias durante el período y el relevamiento de la infraestructura no registra reinicios acumulados en ninguno de los contenedores en servicio.
+
+El riesgo de sobrecostos en el consumo de los servicios de inteligencia artificial no pudo evaluarse con la evidencia disponible en el sistema, ya que el gasto se registra en el panel de facturación del proveedor y no en ninguna de las fuentes empleadas en este trabajo.
+% [PENDIENTE: incorporar el costo real del período 04/06 al 17/08 de 2026 desde el
+% panel de facturación de OpenAI, y contrastarlo contra el presupuesto previsto en
+% la planificación para cerrar este riesgo. Dato no obtenible desde el servidor.]
+
+Como observación transversal, el dimensionamiento de la infraestructura resultó holgado. El servidor virtual, con cuatro núcleos y 16 gigabytes de memoria, sostuvo la totalidad de los servicios con una carga media inferior a la centésima parte de su capacidad de cómputo, un consumo de memoria de 3,6 gigabytes y una ocupación de disco del 11 por ciento, tras 227 días de servicio ininterrumpido. La base relacional del sistema ocupa alrededor de 12 megabytes luego de 4934 pedidos y 37931 ítems, mientras que el registro de ejecuciones de la plataforma de orquestación supera los dos gigabytes y medio. Esa desproporción, de más de dos órdenes de magnitud, explica por sí sola la necesidad de la purga automática que restringió la ventana de análisis de la orquestación a catorce días.
+
+\subsection{Técnicas empleadas}
+
+Tres técnicas resultaron decisivas para el desarrollo.
+
+La primera fue la construcción de un servidor de impresión simulado, que reproduce la interfaz del servidor real y registra el ticket en lugar de imprimirlo. Permitió desarrollar y depurar la totalidad de la cadena sin disponer del hardware, que se adquirió cuando el resto del sistema ya se encontraba en operación.
+
+La segunda fue el despliegue escalonado descripto más arriba, que separó la puesta en producción de la interpretación de la puesta en producción de la actuación física.
+
+La tercera fue el lazo de realimentación del catálogo. El panel destaca los ítems que no pudieron asociarse, y el personal del comercio los empleó para ampliar el catálogo de forma progresiva. El caso del huevo resulta ilustrativo: acumuló 55 ocurrencias no asociadas entre el 10 de junio y el 12 de julio, fecha en que el producto se dio de alta, y a partir de entonces no volvió a registrar ningún fallo. Esa técnica no estaba prevista en la planificación y emergió del uso, pero constituyó la mitigación efectiva del riesgo de calidad de la interpretación.
+
+En sentido inverso, dos decisiones no rindieron lo esperado. La ausencia de pruebas automatizadas obligó a diferir toda verificación hasta la operación real, lo que resultó viable en este proyecto por su escala pero no constituye una práctica extrapolable. Y la redundancia de dos modelos de proveedores distintos sobre cada imagen, con un tercer modelo que reconcilia sus lecturas, agrega costo y latencia sin que el trabajo haya podido medir su aporte, dado que el sistema no conserva las lecturas individuales previas a la reconciliación.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
 %----------------------------------------------------------------------------------------
 \section{Próximos pasos}
 
-Acá se indica cómo se podría continuar el trabajo más adelante.
+Las líneas de continuación se ordenan según su impacto sobre la operación.
+
+La primera es la implementación de una cola de impresiones pendientes con reintento automático al restablecerse el vínculo con el nodo de borde. Es la mejora de mayor impacto sobre la confiabilidad percibida, ya que habría evitado la totalidad de los 15 pedidos que quedaron sin comprobante, y su alcance es superior al del mecanismo de supervisión previsto en la planificación por resolver el problema con independencia de su causa.
+
+La segunda es la extensión del modelo de datos para incorporar el instante de recepción del mensaje, su formato de origen y una referencia al mensaje original. Esa modificación cerraría la discontinuidad de la cadena de trazabilidad y convertiría en permanentes dos mediciones que este trabajo debió reconstruir por inferencia: la latencia extremo a extremo y el desempeño desagregado por formato de entrada.
+
+La tercera es la ampliación del catálogo con las variedades comerciales y los códigos de calibre de los proveedores, junto con una vista del panel que ordene por frecuencia los ítems no asociados. Ambas medidas atacan el 79,48 por ciento del error residual que responde a limitaciones de cobertura, y transformarían en sistemático el lazo de realimentación que hoy opera de manera reactiva.
+
+La cuarta es la revisión del intervalo de espera por inactividad. La medición demostró que el tiempo de interpretación se ubica en el orden de las unidades de segundo, muy por debajo de los sesenta que dura cada ciclo de espera, de modo que su reducción disminuiría la latencia percibida en los pedidos enviados en un único mensaje. Una caracterización previa de la distribución del tiempo entre mensajes sucesivos de un mismo cliente permitiría fijar ese valor con fundamento empírico.
+
+La quinta es la incorporación de pruebas automatizadas sobre los módulos de interpretación e impresión, junto con el registro del operador que dispara cada impresión desde el panel. La primera cancela la deuda técnica señalada; la segunda separaría de forma explícita las dos poblaciones de impresiones que este trabajo debió distinguir por inferencia.
+
+Por último, la evidencia reunida sugiere una línea de trabajo que excede el alcance original. El sistema resuelve algo más del doble de conversaciones que de pedidos, ya que interpreta consultas, confirmaciones y saludos que no derivan en un encargo. Ese volumen, hoy descartado, constituye información sobre la demanda y sobre la interacción con los clientes que el sistema podría aprovechar.
