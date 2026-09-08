@@ -306,7 +306,7 @@ El tiempo de cómputo de la interpretación se ubica, por lo tanto, en el orden 
 
 El contraste entre ambos tramos constituye el resultado central del trabajo. La etapa que depende de servicios remotos admite una espera de sesenta segundos porque su restricción no es de latencia sino de completitud del pedido, mientras que la etapa que ejecuta la actuación física en el borde opera con un máximo de 4,22 segundos y una mediana inferior al medio segundo. La distribución del cómputo asignó a cada entorno la tarea que mejor se ajusta a sus características.
 
-Corresponde precisar qué unidad mide esta distribución. Durante la ventana analizada, 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, lo que arroja una relación de 2,26 ejecuciones por pedido. El origen de esa relación se verificó reconstruyendo, sobre el registro de la plataforma de atención, las agrupaciones de mensajes que el mecanismo de espera por inactividad habría formado en esa misma ventana. Con el criterio de corte de sesenta segundos a los 3386 mensajes entrantes recibidos de contactos individuales, la reconstrucción arroja 1893 agrupaciones; con un corte de noventa segundos, que absorbe la latencia de ingreso de cada mensaje, arroja 1801. Ese valor difiere en menos del uno por ciento de las 1786 ejecuciones que efectivamente interpretaron.
+Corresponde precisar qué unidad mide esta distribución. Durante la ventana analizada, 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, lo que arroja una relación de 2,26 ejecuciones por pedido. El origen de esa relación se verificó reconstruyendo, sobre el registro de la plataforma de atención, las agrupaciones de mensajes que el mecanismo de espera por inactividad habría formado en esa misma ventana. Con el criterio de corte de sesenta segundos aplicado a los 3386 mensajes entrantes recibidos de contactos individuales, la reconstrucción arroja 1893 agrupaciones; con un corte de noventa segundos, que absorbe la latencia de ingreso de cada mensaje, arroja 1801. Ese valor difiere en menos del uno por ciento de las 1786 ejecuciones que efectivamente interpretaron.
 
 La coincidencia establece que cada ejecución de interpretación corresponde a una conversación agrupada y no a un pedido. Las 997 conversaciones restantes son intercambios que superaron los filtros previos pero no derivaron en un encargo, como consultas de precio, confirmaciones y saludos. La duración medida es, en consecuencia, la del procesamiento de una conversación, y el sistema resuelve algo más del doble de conversaciones que de pedidos.
 
@@ -319,13 +319,13 @@ El requerimiento de admitir pedidos en texto, voz, imagen y documento exige comp
 
 Los dos sistemas no comparten identificadores, de modo que la correspondencia entre un mensaje y el pedido que produjo debió reconstruirse. El procedimiento aprovecha el mecanismo de agrupación por inactividad descripto en la sección \ref{subsec:composicion_latencia}: dado que el flujo persiste el pedido una vez transcurrida la espera sin nuevos mensajes, todo pedido debe estar precedido por un mensaje del mismo contacto a una distancia próxima a esa espera. Se emparejó entonces cada pedido con el último mensaje entrante recibido del mismo número de contacto con anterioridad a su registro.
 
-La distribución de esas distancias confirma la validez del emparejamiento. La mediana es de 72 segundos, con un primer cuartil de 68 y un tercer cuartil de 85, valores que reproducen la espera de sesenta segundos más el tiempo de procesamiento. Se consideraron atribuibles los pedidos cuyo mensaje precedente se ubica a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana, es decir el 78,48 por ciento. Para cada uno de ellos se reconstruyó además la agrupación completa, que encadena hacia atrás los mensajes separados por menos de noventa segundos, y se asignó al pedido el formato de los adjuntos presentes en esa agrupación.
+La distribución de esas distancias confirma la validez del emparejamiento. La mediana es de 72 segundos, con un primer cuartil de 68 y un tercer cuartil de 85, valores que reproducen la espera de sesenta segundos más el tiempo de procesamiento. Se consideraron atribuibles los pedidos cuyo mensaje precedente se ubica a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana, es decir el 78,48 por ciento. Para cada uno de ellos se reconstruyó además la agrupación completa, con un encadenamiento hacia atrás de los mensajes separados por menos de noventa segundos, y se asignó al pedido el formato de los adjuntos presentes en esa agrupación.
 
 La cobertura del emparejamiento se mantiene estable a lo largo de todo el período, con una mediana diaria del 79 por ciento y un mínimo del 61 por ciento, sin días de cobertura anómala. Esa uniformidad permite descartar que el subconjunto atribuido corresponda a un tramo particular de la operación y sostiene su uso como muestra del conjunto.
 
 \subsubsection*{Composición del tráfico y resultados por formato}
 
-Durante la ventana de 75 días se recibieron 16619 mensajes entrantes de contactos individuales, con la siguiente distribución por formato: 77,39 por ciento de texto, 12,41 por ciento de audio, 8,29 por ciento de imagen, 1,78 por ciento de documento y 0,14 por ciento de video. Las cuatro modalidades previstas por el requerimiento se presentan, por lo tanto, en la operación real y con volumen suficiente para ser comparadas, con la salvedad del video, cuya presencia es marginal.
+Durante la ventana de 75 días se recibieron 16619 mensajes entrantes de contactos individuales. De ese total, el 77,39 por ciento fue texto, el 12,41 por ciento audio, el 8,29 por ciento imagen, el 1,78 por ciento documento y el 0,14 por ciento video. Las cuatro modalidades previstas por el requerimiento se presentan, por lo tanto, en la operación real y con volumen suficiente para ser comparadas, con la salvedad del video, cuya presencia es marginal.
 
 En la tabla \ref{tab:formatos} se presentan los resultados de la auditoría sobre los 3038 pedidos atribuidos. La categoría mixta reúne los pedidos cuya agrupación combina adjuntos de más de un tipo.
 
@@ -337,14 +337,14 @@ En la tabla \ref{tab:formatos} se presentan los resultados de la auditoría sobr
         \toprule
         \textbf{Formato} & \textbf{Pedidos} & \textbf{\%} & \textbf{Ítems} & \textbf{Tasa de asociación} & \textbf{Ítems/pedido} \\
         \midrule
-        Texto     & 2013 & 66,26 & 12060 & 99,17 & 5,99  \\
-        Audio     & 563  & 18,53 & 2952  & 99,32 & 5,24  \\
-        Imagen    & 405  & 13,33 & 4727  & 99,30 & 11,67 \\
-        Mixto     & 40   & 1,32  & 321   & 98,75 & 8,03  \\
-        Documento & 16   & 0,53  & 424   & 98,11 & 26,50 \\
-        Video     & 1    & 0,03  & 1     & 100,00 & 1,00 \\
+        Texto            & 2013             & 66,26       & 12060          & 99,17                       & 5,99                  \\
+        Audio            & 563              & 18,53       & 2952           & 99,32                       & 5,24                  \\
+        Imagen           & 405              & 13,33       & 4727           & 99,30                       & 11,67                 \\
+        Mixto            & 40               & 1,32        & 321            & 98,75                       & 8,03                  \\
+        Documento        & 16               & 0,53        & 424            & 98,11                       & 26,50                 \\
+        Video            & 1                & 0,03        & 1              & 100,00                      & 1,00                  \\
         \midrule
-        Total     & 3038 & 100,00 & 20485 & 99,19 & 6,74 \\
+        Total            & 3038             & 100,00      & 20485          & 99,19                       & 6,74                  \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -364,6 +364,21 @@ La primera es que el indicador empleado es la tasa de asociación de los ítems 
 La segunda es que el tiempo extremo a extremo no puede desagregarse por formato. El instante de llegada del mensaje se conserva en la plataforma de atención y el de persistencia del pedido en la base relacional, pero el registro de ejecuciones no discrimina la modalidad procesada, de modo que no es posible aislar el costo de la transcripción de audio o de la lectura de imagen dentro de la latencia total.
 
 La tercera es que el 21,52 por ciento de los pedidos de la ventana no pudo atribuirse a ningún mensaje próximo. Ese conjunto presenta pedidos de mayor tamaño, con 10,78 ítems por pedido, y una tasa de asociación inferior, del 96,75 por ciento, de modo que su exclusión eleva el valor global de la muestra auditada por encima del 98,45 por ciento del conjunto completo. La comparación entre formatos no resulta afectada, ya que el sesgo opera sobre todas las modalidades por igual, pero los valores absolutos de la tabla \ref{tab:formatos} no deben leerse como la tasa de asociación del sistema, que es la reportada en la sección \ref{subsec:items_no_reconocidos}.
+
+\subsection{Ensayo de interfaz}
+\label{subsec:ensayo_interfaz}
+
+% [PENDIENTE: completar esta subsección con los resultados del checklist de
+% navegadores y responsive. Estructura sugerida abajo; reemplazar los valores
+% entre corchetes por las observaciones reales.]
+
+El acceso al panel sin instalación adicional y su adaptación a distintos tamaños de pantalla se verificaron mediante un recorrido funcional en los tres navegadores de mayor uso y en dos anchos de pantalla representativos de un dispositivo móvil y una tableta.
+
+Se recorrieron las vistas de tablero, pedidos, detalle de pedido, productos, clientes y estadísticas en Google Chrome, Mozilla Firefox y Microsoft Edge, con registro de la presencia de errores en la consola del navegador. [Resultado: N de N navegadores sin errores de consola / detalle de las excepciones encontradas].
+
+La adaptación a distintos tamaños de pantalla se evaluó con una reducción del ancho de la ventana a 375 y 768 píxeles, valores representativos de un teléfono y una tableta en orientación vertical. [Resultado: comportamiento del menú de navegación, legibilidad de las tablas y usabilidad de los controles en cada ancho].
+
+    [Conclusión: síntesis de si el panel resultó utilizable sin instalación adicional y en los anchos de pantalla evaluados, con las salvedades que correspondan].
 
 \subsection{Trazabilidad del pedido}
 \label{subsec:trazabilidad}
@@ -392,18 +407,33 @@ En la tabla \ref{tab:verificacion} se resume el grado de cumplimiento de los req
     \label{tab:verificacion}
     \begin{tabular}{c p{6.2cm} p{4.6cm}}
         \toprule
-        \textbf{Req.} & \textbf{Evidencia}                                    & \textbf{Resultado}                                                                              \\
+        \textbf{Req.} & \textbf{Evidencia}                                                  & \textbf{Resultado}                                                                                                         \\
         \midrule
-        1.2           & Auditoría por formato de entrada                      & Cuatro formatos en operación; tasa de asociación entre 99,17 y 99,32 por ciento sin diferencia entre texto, audio e imagen \\
-        1.3           & Tasa de asociación de ítems con el catálogo           & 98,45 por ciento sobre 29457 ítems                                                              \\
-        1.6           & Operaciones de impresión y pedidos sin ticket emitido & 99,49 por ciento sobre 4334 operaciones; 15 pedidos sin ticket, equivalentes al 0,39 por ciento \\
-        1.7           & Episodios de pérdida del vínculo con el borde         & 7 episodios en 50 días, 21 pedidos afectados                                                    \\
-        1.11          & Registro de ítems, ticket e impresiones               & Verificado con una discontinuidad                                                               \\
-        3.1           & Pruebas unitarias automatizadas                       & No implementadas                                                                                \\
-        3.2           & Tasa de error de la orquestación                      & 0,10 por ciento sobre 7036 ejecuciones                                                          \\
-        3.3           & Operación en el comercio durante 75 días              & 3871 pedidos de 202 clientes                                                                    \\
-        3.4           & Impresiones sin fallas atribuibles a la impresora     & Verificado                                                                                      \\
-        3.5           & Latencia de la actuación en el borde                  & Mediana de 0,338 s                                                                              \\
+        1.2           & Auditoría por formato de entrada                                    & Cuatro formatos en operación; tasa de asociación entre 99,17 y 99,32 por ciento sin diferencia entre texto, audio e imagen \\
+        1.3           & Tasa de asociación de ítems con el catálogo                         & 98,45 por ciento sobre 29457 ítems                                                                                         \\
+        1.6           & Operaciones de impresión y pedidos sin ticket emitido               & 99,49 por ciento sobre 4334 operaciones; 15 pedidos sin ticket, equivalentes al 0,39 por ciento                            \\
+        1.7           & Episodios de pérdida del vínculo con el borde                       & 7 episodios en 50 días, 21 pedidos afectados                                                                               \\
+        1.11          & Registro de ítems, ticket e impresiones                             & Verificado con una discontinuidad                                                                                          \\
+        3.1           & Pruebas unitarias automatizadas                                     & No implementadas                                                                                                           \\
+        3.2           & Tasa de error de la orquestación                                    & 0,10 por ciento sobre 7036 ejecuciones                                                                                     \\
+        3.3           & Operación en el comercio durante 75 días                            & 3871 pedidos de 202 clientes                                                                                               \\
+        3.4           & Impresiones sin fallas atribuibles a la impresora                   & Verificado                                                                                                                 \\
+        3.5           & Latencia de la actuación en el borde                                & Mediana de 0,338 s                                                                                                         \\
+        \midrule
+        1.1           & Recepción y procesamiento continuo de pedidos por WhatsApp          & Verificado; 3871 pedidos de 202 clientes en 75 días                                                                        \\
+        1.4           & Persistencia de pedidos, clientes y productos en PostgreSQL         & Verificado; modelo de datos de la sección \ref{subsec:modelo_datos}                                                        \\
+        1.5           & Uso de Redis para sesiones y clientes activos                       & Verificado; mecanismo de agrupación de la sección \ref{subsec:agrupacion}                                                  \\
+        1.8           & Ticket con datos del cliente, productos, aclaraciones, fecha y hora & Verificado; anexo \ref{AppendixA}, figura \ref{fig:ticket_real}                                                            \\
+        1.9           & Panel con pedidos en tiempo real, historial y métricas              & Verificado; uso diario continuo durante el período analizado                                                               \\
+        1.10          & Configuración de productos, precios y catálogo desde el panel       & Verificado; sección \ref{subsec:panel}                                                                                     \\
+        \midrule
+        4.1           & Acceso al panel sin instalación adicional                           & Sección \ref{subsec:ensayo_interfaz}                                                                                       \\
+        4.2           & Interfaz clara con alertas de pedidos nuevos                        & Verificado; tablero con bloques de alerta, sección \ref{subsec:panel}                                                      \\
+        4.3           & Adaptación a distintos tamaños de pantalla                          & Sección \ref{subsec:ensayo_interfaz}                                                                                       \\
+        \midrule
+        5.1           & Compatibilidad con la API oficial de WhatsApp Business              & Diseño declarado compatible; migración no ejecutada                                                                        \\
+        5.2           & Soporte para múltiples dispositivos o cuentas                       & No evaluado con la evidencia disponible                                                                                    \\
+        5.3           & Exportabilidad de los flujos de n8n                                 & Verificado; los flujos se versionan como archivos JSON                                                                     \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -415,7 +445,7 @@ El conjunto de ensayos permitió identificar seis limitaciones.
 
 La primera es la dependencia del sistema respecto del estado del catálogo. La cobertura incompleta y la baja de productos vigentes explican 364 de los 458 ítems no asociados, es decir el 79,48 por ciento. Ese conjunto reúne los productos incorporados con posterioridad, los de almacén y los frescos ausentes, los dados de baja y las variedades comerciales y códigos de calibre, que se retoman en la limitación siguiente por constituir un caso de naturaleza propia dentro de esa misma causa. El sistema carece de un mecanismo que anticipe esa condición, de modo que la incorporación de productos ocurre siempre con posterioridad al primer pedido que los solicita.
 
-La segunda es la cobertura del catálogo frente a la terminología del comercio mayorista. Las variedades y los códigos de calibre que aparecen en las listas de proveedor no tienen correspondencia en el catálogo, que registra los productos con su nombre genérico, y concentran 112 casos. Sumados a las 80 denominaciones sin correspondencia interpretable, que no responden a la cobertura del catálogo sino a la lectura del mensaje de origen, alcanzan el 41,92 por ciento de los ítems no asociados. La distinción es relevante porque ambos grupos exigen medidas distintas: los primeros se resuelven con la ampliación del catálogo, mientras que los segundos dependen de la calidad del mensaje recibido.
+La segunda es la cobertura del catálogo frente a la terminología del comercio mayorista. Las variedades y los códigos de calibre que aparecen en las listas de proveedor no tienen correspondencia en el catálogo, que registra los productos con su nombre genérico, y concentran 112 casos. Sumados a las 80 denominaciones sin correspondencia interpretable, que no responden a la cobertura del catálogo sino a la lectura del mensaje de origen, alcanzan el 41,92 por ciento de los ítems no asociados. La distinción es relevante porque ambos grupos exigen medidas distintas: los primeros se resuelven con una ampliación del catálogo, mientras que los segundos dependen de la calidad del mensaje recibido.
 
 La tercera es la ausencia de un mecanismo de reintento automático de la impresión. Los episodios de pérdida de conectividad dejaron 15 pedidos sin ticket emitido, equivalentes al 0,39 por ciento del total procesado, y su recuperación quedó a cargo del personal, que debió advertir la situación y resolver el armado sin comprobante.
 
