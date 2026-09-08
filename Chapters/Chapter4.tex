@@ -40,9 +40,7 @@ Las mediciones no cubren todas un mismo intervalo, ya que cada subsistema conser
     \end{tabular}
 \end{table}
 
-La diferencia entre la primera y la segunda ventana obedece a la puesta en marcha escalonada de la solución. Durante las cuatro primeras semanas la capa de captura e interpretación operó con el volumen completo de pedidos, pero el comercio aún no contaba con la impresora térmica. En ese período los pedidos interpretados se volcaron a un archivo de texto alojado en un servicio de almacenamiento en la nube, que el personal consultaba de forma manual. Ese mecanismo cumplió una doble función: permitió sostener la operación sin la actuación en el borde y habilitó la revisión sistemática de la calidad de la interpretación antes de automatizar la emisión de tickets.
-
-Una vez adquirida e instalada la impresora, y verificada la correcta interpretación de los pedidos durante ese período de observación, la actuación automática sobre el nodo de borde se habilitó en la semana del 29 de junio. A partir de ese momento el volumen de impresiones se estabilizó por encima de las quinientas operaciones semanales. La decisión de no automatizar la impresión hasta contar con evidencia de la calidad de la interpretación constituyó una medida deliberada de reducción de riesgo operativo.
+La diferencia entre la primera y la segunda ventana obedece a la puesta en marcha escalonada. Durante las cuatro primeras semanas la capa de captura e interpretación operó con el volumen completo de pedidos sin impresora térmica en el comercio, y los resultados se volcaron a un archivo de texto en la nube que el personal consultaba de forma manual. La actuación automática en el borde se habilitó en la semana del 29 de junio, una vez instalada la impresora y verificada la calidad de la interpretación, tras lo cual el volumen se estabilizó por encima de las quinientas operaciones semanales. Diferir la automatización hasta contar con esa evidencia constituyó una medida deliberada de reducción de riesgo operativo.
 
 La tercera ventana responde a una restricción del registro de ejecuciones de la plataforma de orquestación, que conserva las ejecuciones durante catorce días y luego las elimina de forma automática. Sobre ese lapso se registraron 7036 ejecuciones y 789 pedidos.
 
@@ -51,7 +49,7 @@ La tercera ventana responde a una restricción del registro de ejecuciones de la
 
 La medición se apoyó en tres fuentes de información distintas.
 
-La primera es la base de datos relacional del sistema, que registra cada pedido, cada ítem y cada intento de impresión con su marca temporal y su resultado. La tabla \code{print\_logs} conserva el estado de cada operación de impresión y el mensaje de error asociado, mientras que la ausencia de valor en el campo \code{producto\_id} de la tabla \code{items\_pedido} identifica los ítems que el agente no logró vincular con el catálogo del comercio. Esta fuente aporta la totalidad de la información de las secciones \ref{sec:ensayos_conectividad} y \ref{sec:ensayos_aplicacion}. Corresponde señalar que la base conserva el pedido ya estructurado y no el mensaje original recibido, que permanece disponible en la plataforma de atención vinculada al canal de mensajería.
+La primera es la base de datos relacional del sistema, que registra cada pedido, cada ítem y cada intento de impresión con su marca temporal y su resultado: la tabla \code{print\_logs} conserva el estado de cada operación de impresión, y la ausencia de valor en el campo \code{producto\_id} de \code{items\_pedido} identifica los ítems no vinculados al catálogo. Esta fuente aporta la totalidad de la información de las secciones \ref{sec:ensayos_conectividad} y \ref{sec:ensayos_aplicacion}, aunque conserva el pedido ya estructurado y no el mensaje original.
 
 La segunda es el registro de ejecuciones de la plataforma de orquestación, que conserva el instante de inicio y de finalización de cada flujo junto con su estado final. Esa información permite acotar el tiempo de interpretación, que no queda registrado en la base relacional del sistema.
 
@@ -158,8 +156,6 @@ La métrica adoptada para evaluar la interpretación fue la proporción de ítem
 
 Sobre un total de 29457 ítems procesados durante los 75 días de operación, 28999 fueron asociados con un producto del catálogo, lo que arroja una tasa de reconocimiento del 98,45 por ciento. Los 458 ítems restantes quedaron sin asociar y se distribuyeron en 213 denominaciones distintas.
 
-La magnitud de la muestra resulta relevante para la interpretación del resultado. La medición no se apoyó en un conjunto de prueba construido para la ocasión, sino en la totalidad de los pedidos recibidos durante la operación real del comercio, con la variabilidad de redacción, ortografía y formato propia de los mensajes de clientes reales.
-
 \subsection{Análisis de los ítems no reconocidos}
 \label{subsec:items_no_reconocidos}
 
@@ -187,7 +183,7 @@ Las denominaciones no asociadas se clasificaron mediante su normalización, con 
     \end{tabular}
 \end{table}
 
-La primera situación reúne nombres de variedad y códigos de calibre propios del comercio mayorista de frutas, como las variedades de mandarina Ellendale y Encore (38 casos) y de pera Bosc (18 casos), ninguna con correspondencia en el catálogo. Las escrituras registradas son además inconsistentes, con Ellendale bajo nueve variantes y Bosc bajo quince, un patrón compatible con la transcripción de listas con terminología ausente del catálogo. Esto es una hipótesis sobre el origen del error, no un resultado medido: la auditoría por formato de la sección \ref{subsec:ensayo_formatos} no confirma que se concentre en la modalidad de imagen, aunque sí distingue a esa modalidad por el tamaño del pedido.
+La primera situación reúne nombres de variedad y códigos de calibre propios del comercio mayorista de frutas, como las variedades de mandarina Ellendale y Encore (38 casos) y de pera Bosc (18 casos), ninguna con correspondencia en el catálogo. Las escrituras registradas son además inconsistentes, con Ellendale bajo nueve variantes y Bosc bajo quince, un patrón compatible con la transcripción de listas con terminología ausente del catálogo.
 
 La segunda situación agrupa 94 ítems de productos que no integraban el catálogo al momento del pedido y se incorporaron después. El caso del huevo es ilustrativo: 55 ocurrencias no asociadas entre el 10 de junio y el 12 de julio, sin fallos posteriores a su alta. El patrón evidencia un mecanismo de realimentación operativa, en el que los ítems que el panel destaca orientan la ampliación progresiva del catálogo.
 
@@ -300,7 +296,7 @@ El tiempo de cómputo de la interpretación se ubica, por lo tanto, en el orden 
 
 El contraste entre ambos tramos constituye el resultado central del trabajo. La etapa que depende de servicios remotos admite una espera de sesenta segundos porque su restricción no es de latencia sino de completitud del pedido, mientras que la etapa que ejecuta la actuación física en el borde opera con un máximo de 4,22 segundos y una mediana inferior al medio segundo. La distribución del cómputo asignó a cada entorno la tarea que mejor se ajusta a sus características.
 
-Corresponde precisar qué unidad mide esta distribución. Durante la ventana analizada, 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, lo que arroja una relación de 2,26 ejecuciones por pedido. El origen de esa relación se verificó reconstruyendo, sobre el registro de la plataforma de atención, las agrupaciones de mensajes que el mecanismo de espera por inactividad habría formado en esa misma ventana. Con el criterio de corte de sesenta segundos aplicado a los 3386 mensajes entrantes recibidos de contactos individuales, la reconstrucción arroja 1893 agrupaciones; con un corte de noventa segundos, que absorbe la latencia de ingreso de cada mensaje, arroja 1801. Ese valor difiere en menos del uno por ciento de las 1786 ejecuciones que efectivamente interpretaron.
+Corresponde precisar qué unidad mide esta distribución, ya que 1786 ejecuciones completaron la interpretación frente a 789 pedidos persistidos, una relación de 2,26 ejecuciones por pedido. La reconstrucción de las agrupaciones que el mecanismo de espera habría formado sobre los 3386 mensajes de la ventana arroja 1801 con un corte de noventa segundos, valor que difiere en menos del uno por ciento de esas 1786 ejecuciones.
 
 La coincidencia establece que cada ejecución de interpretación corresponde a una conversación agrupada y no a un pedido. Las 997 conversaciones restantes son intercambios que superaron los filtros previos pero no derivaron en un encargo, como consultas de precio, confirmaciones y saludos. La duración medida es, en consecuencia, la del procesamiento de una conversación, y el sistema resuelve algo más del doble de conversaciones que de pedidos.
 
@@ -311,7 +307,7 @@ El requerimiento de admitir pedidos en texto, voz, imagen y documento exige comp
 
 \subsubsection*{Reconstrucción del vínculo entre mensaje y pedido}
 
-Los dos sistemas no comparten identificadores, por lo que la correspondencia entre un mensaje y el pedido que produjo se reconstruyó emparejando cada pedido con el último mensaje entrante del mismo contacto anterior a su registro, aprovechando el mecanismo de agrupación por inactividad de la sección \ref{subsec:composicion_latencia}. La distancia mediana entre ambos es de 72 segundos (primer cuartil 68, tercer cuartil 85), coherente con la espera de sesenta segundos más el procesamiento. Se consideraron atribuibles los pedidos con un mensaje precedente a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana (78,48 por ciento), reconstruyendo además la agrupación completa de cada uno con un encadenamiento hacia atrás de los mensajes separados por menos de noventa segundos.
+Los dos sistemas no comparten identificadores, por lo que la correspondencia entre un mensaje y el pedido se reconstruyó emparejando cada pedido con el último mensaje entrante del mismo contacto anterior a su registro, aprovechando el mecanismo de agrupación por inactividad de la sección \ref{subsec:composicion_latencia}. La distancia mediana entre ambos es de 72 segundos (primer cuartil 68, tercer cuartil 85), coherente con la espera de sesenta segundos más el procesamiento. Se consideraron atribuibles los pedidos con un mensaje precedente a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana (78,48 por ciento).
 
 La cobertura del emparejamiento se mantuvo estable a lo largo del período (mediana diaria del 79 por ciento, mínimo del 61 por ciento), sin días anómalos, lo que descarta que el subconjunto atribuido corresponda a un tramo particular de la operación.
 
@@ -435,7 +431,7 @@ La segunda es la cobertura del catálogo frente a la terminología del comercio 
 
 La tercera es la ausencia de un mecanismo de reintento automático de la impresión. Los episodios de pérdida de conectividad dejaron 15 pedidos sin ticket emitido, equivalentes al 0,39 por ciento del total procesado, y su recuperación quedó a cargo del personal, que debió advertir la situación y resolver el armado sin comprobante.
 
-La cuarta es la ausencia de un registro del instante de recepción del mensaje y del formato de origen en la base de datos del sistema. Esa omisión impide medir la latencia extremo a extremo de forma directa y comparar el desempeño entre modalidades de entrada, y obliga a reconstruir el primer tramo a partir del registro de ejecuciones de la orquestación, que se purga cada catorce días. La misma omisión introduce la discontinuidad en la cadena de trazabilidad señalada en la sección \ref{subsec:trazabilidad}.
+La cuarta es la ausencia de un registro del instante de recepción del mensaje y del formato de origen en la base de datos del sistema. Esa omisión impide medir la latencia extremo a extremo de forma directa y comparar el desempeño entre modalidades de entrada. La misma omisión introduce la discontinuidad en la cadena de trazabilidad señalada en la sección \ref{subsec:trazabilidad}.
 
 La quinta es la ausencia de identificación del operador en el registro de impresiones. El campo previsto para ese fin permaneció sin valor en la totalidad de los casos, de modo que la distinción entre la impresión automática y la reimpresión manual debió inferirse a partir de la distribución de las latencias en lugar de leerse de forma directa.
 

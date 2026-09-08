@@ -5,7 +5,7 @@
 
 \label{Chapter5}
 
-En el presente capítulo se valora el trabajo realizado a la luz de los objetivos planteados y de la evidencia reunida en el capítulo \ref{Chapter4}. Se analiza el grado de cumplimiento de los requerimientos, la fidelidad de la ejecución respecto de la planificación original, el comportamiento de los riesgos identificados y la utilidad de las técnicas empleadas. El capítulo cierra con las líneas de trabajo que se desprenden de los resultados obtenidos.
+En el presente capítulo se valora el trabajo a la luz de los objetivos planteados y de la evidencia del capítulo \ref{Chapter4}, y se cierra con las líneas de continuación que de ella se desprenden.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 1
@@ -13,41 +13,35 @@ En el presente capítulo se valora el trabajo realizado a la luz de los objetivo
 
 \section{Conclusiones generales}
 
-El trabajo produjo un sistema que se encuentra en operación continua en el comercio para el que fue concebido. Esa circunstancia constituye el principal aporte, ya que los resultados presentados no provienen de un banco de pruebas sino del uso sostenido por parte de sus destinatarios durante 75 días, con 3871 pedidos de 202 clientes y 29457 ítems interpretados.
+El principal aporte del trabajo es un sistema en operación continua en el comercio para el que fue concebido: los resultados no provienen de un banco de pruebas sino del uso sostenido por sus destinatarios durante 75 días, con 3871 pedidos de 202 clientes y 29457 ítems interpretados.
 
 \subsection{Grado de cumplimiento de los objetivos}
 
-Los objetivos específicos formulados en la sección \ref{sec:objetivos} se alcanzaron en su totalidad. Los logros concretos son los siguientes:
+Los objetivos específicos de la sección \ref{sec:objetivos} se alcanzaron en su totalidad:
 
 \begin{itemize}
-	\item Se automatizó la captura de pedidos en las cuatro modalidades que el canal admite. La auditoría de la sección \ref{subsec:ensayo_formatos} verificó que texto, audio e imagen se interpretan con tasas de asociación comprendidas entre el 99,17 y el 99,32 por ciento, sin penalización medible de las modalidades multimodales respecto del texto plano.
-	\item Se alcanzó una tasa de asociación de ítems con el catálogo del 98,45 por ciento sobre 29457 ítems, y el análisis de los 458 casos restantes demostró que el 79,48 por ciento de ellos responde a limitaciones de cobertura del catálogo y no a errores de interpretación.
-	\item Se implementó la trazabilidad completa del pedido, que resultó suficiente para obtener la totalidad de las mediciones de este trabajo sin instrumentación adicional.
-	\item Se automatizó la impresión en el borde con una latencia de mediana 0,338 segundos y máximo 4,22 segundos, sobre 4334 operaciones con una tasa de éxito del 99,49 por ciento.
-	\item Se estableció la comunicación segura entre la nube y el nodo de borde mediante un túnel, cuyo comportamiento se caracterizó en 7 episodios de indisponibilidad a lo largo de 50 días.
-	\item Se construyó el panel web, que se incorporó a la operación diaria y que además habilitó el mecanismo de realimentación del catálogo descripto más adelante.
-	\item Se validó el sistema en condiciones reales, criterio de aceptación que operó de manera efectiva mediante el uso sostenido por parte del comercio.
+	\item Captura automática en las cuatro modalidades del canal, con tasas de asociación entre 99,17 y 99,32 por ciento y sin penalización medible frente al texto plano.
+	\item Tasa de asociación con el catálogo del 98,45 por ciento sobre 29457 ítems; el 79,48 por ciento de los casos restantes responde a cobertura de catálogo, no a errores de interpretación.
+	\item Trazabilidad completa del pedido, suficiente para todas las mediciones sin instrumentación adicional.
+	\item Impresión automática en el borde con mediana de 0,338 s y máximo de 4,22 s, sobre 4334 operaciones con 99,49 por ciento de éxito.
+	\item Comunicación segura entre la nube y el borde mediante un túnel, con 7 episodios de indisponibilidad en 50 días.
+	\item Panel web incorporado a la operación diaria, que habilitó el lazo de realimentación del catálogo.
+	\item Validación en condiciones reales por uso sostenido del comercio.
 \end{itemize}
 
-De los requerimientos verificados en la sección \ref{subsec:verificacion_requerimientos}, uno solo no se satisfizo: el que preveía la implementación de pruebas unitarias automatizadas. La verificación se resolvió en su reemplazo mediante la operación real, estrategia que aportó una cobertura de casos superior pero que no detecta regresiones de manera anticipada ni permite aislar la causa de una falla. La incorporación de esas pruebas queda como la deuda técnica más relevante del trabajo. Un segundo requerimiento, el de trazabilidad, se verificó con una salvedad: el mensaje original no se persiste en la base relacional, de modo que la reconstrucción del recorrido completo exige consultar dos sistemas distintos.
+De los requerimientos de la sección \ref{subsec:verificacion_requerimientos}, solo las pruebas unitarias automatizadas no se satisficieron: la operación real las reemplazó con mayor cobertura de casos, pero sin detectar regresiones ni aislar fallas. Es la deuda técnica más relevante del trabajo. El de trazabilidad se verificó con una salvedad: el mensaje original no se persiste en la base relacional, por lo que reconstruirlo exige consultar dos sistemas.
 
 \subsection{Fidelidad respecto de la planificación}
 
-La ejecución se apartó de la planificación en el ordenamiento de las etapas antes que en su contenido. El desarrollo se concentró entre el 20 de abril y comienzos de junio de 2026, con intervenciones puntuales posteriores sobre la interfaz de programación y los flujos de orquestación. La frecuencia de las confirmaciones del repositorio documenta esa cronología, pero no permite contrastar el esfuerzo real contra las 600 horas previstas en la planificación.
-
-La desviación deliberada de mayor consecuencia fue adelantar la puesta en producción respecto del final del desarrollo: el sistema recibió su primer pedido el 4 de junio de 2026 con el panel aún en construcción y sin impresora térmica, volcando los pedidos interpretados a un archivo de consulta manual hasta habilitar la impresión automática el 29 de junio, una vez verificada la calidad de la interpretación. La decisión redujo el riesgo de la puesta en marcha y aportó cuatro semanas de datos reales para ampliar el catálogo, a costa de una mayor carga operativa para el personal.
+La ejecución se apartó de la planificación en el orden de las etapas, no en su contenido. La desviación más relevante fue adelantar la puesta en producción: el primer pedido se recibió el 4 de junio sin panel terminado ni impresora, y la impresión automática se habilitó recién el 29, verificada la calidad de la interpretación. La decisión redujo el riesgo de la puesta en marcha y aportó cuatro semanas de datos para ampliar el catálogo, a costa de mayor carga operativa.
 
 \subsection{Comportamiento de los riesgos identificados}
 
-De los cinco riesgos previstos en la planificación, dos se manifestaron durante el período de operación.
+De los cinco riesgos previstos, dos se manifestaron. El de fallas de integración no se materializó: 7 fallas sobre 7036 ejecuciones (0,10 por ciento).
 
-El riesgo de fallas de integración entre la plataforma de orquestación, la interfaz de programación y los servicios de inteligencia artificial no se materializó. Sobre 7036 ejecuciones se registraron 7 fallas, equivalentes al 0,10 por ciento, y cada una de esas ejecuciones involucra a la totalidad de los componentes de la cadena.
+El de caídas del servidor local sí se manifestó: 7 episodios en 50 días dejaron 15 pedidos sin ticket (0,39 por ciento). El watchdog previsto no se implementó; una cola de reintentos habría sido mejor mitigación, ya que el enlace se restablece solo.
 
-El riesgo de caídas del servidor local de impresión sí se manifestó: 7 episodios en 50 días afectaron a 21 pedidos y dejaron 15 sin ticket (0,39 por ciento del total), y la mitigación prevista, un watchdog de reinicio automático, no llegó a implementarse, por lo que la recuperación quedó a cargo del personal. La evidencia sugiere, sin embargo, una mitigación más adecuada que la prevista: una cola de reintentos en la nube habría emitido los 15 tickets faltantes con independencia de la causa de la caída, ya que el enlace se restablece por sí solo en plazos acotados.
-
-El riesgo de baja calidad de los mensajes se manifestó de forma parcial: de los 458 ítems no asociados (1,55 por ciento), solo 80 son denominaciones sin correspondencia interpretable, y la auditoría por formato mostró que ese error no depende de la modalidad, por lo que la interpretación multimodal resultó más robusta de lo previsto. La mitigación efectiva fue un mecanismo emergente, descripto en el apartado siguiente, y no ninguna de las previstas.
-
-El riesgo de pérdida de datos en la base no se manifestó, sin inconsistencias detectadas durante el período. El riesgo de sobrecostos en los servicios de inteligencia artificial no pudo evaluarse con la evidencia disponible, ya que el gasto se registra en el panel de facturación del proveedor.
+El de baja calidad de los mensajes se manifestó de forma parcial: solo 80 de los 458 ítems no asociados son denominaciones sin correspondencia interpretable, sin relación con la modalidad. Su mitigación efectiva fue un mecanismo emergente, no una de las previstas. Los de pérdida de datos y sobrecostos no se manifestaron o no pudieron evaluarse.
 % [PENDIENTE: incorporar el costo real del período desde el panel de OpenAI si se quiere cerrar este riesgo.]
 
 \subsection{Técnicas empleadas}
@@ -55,18 +49,16 @@ El riesgo de pérdida de datos en la base no se manifestó, sin inconsistencias 
 Tres técnicas resultaron decisivas para el desarrollo:
 
 \begin{itemize}
-	\item Un servidor de impresión simulado, que reprodujo la interfaz del servidor real y registró el ticket en lugar de imprimirlo, y permitió desarrollar y depurar la cadena completa sin disponer del hardware, adquirido cuando el resto del sistema ya operaba.
-	\item El despliegue escalonado descripto en la sección anterior, que separó la puesta en producción de la interpretación de la de la actuación física.
-	\item El lazo de realimentación del catálogo: el panel destaca los ítems no asociados, y el personal amplió el catálogo de forma progresiva a partir de ellos. El caso del huevo es ilustrativo, con 55 ocurrencias no asociadas hasta su alta el 12 de julio y ninguna posterior. Esta técnica no estaba prevista en la planificación y constituyó la mitigación efectiva del riesgo de calidad de la interpretación.
+	\item Un servidor de impresión simulado, que permitió depurar la cadena completa sin el hardware, adquirido cuando el resto del sistema ya operaba.
+	\item El despliegue escalonado, que separó la puesta en producción de la interpretación de la de la actuación física.
+	\item El lazo de realimentación del catálogo, no previsto en la planificación y mitigación efectiva del riesgo de calidad: el panel destaca los ítems no asociados y el personal amplía el catálogo a partir de ellos, como el caso del huevo (55 ocurrencias hasta su alta, ninguna después).
 \end{itemize}
 
-En sentido inverso, dos decisiones no rindieron lo esperado: la ausencia de pruebas automatizadas, que obligó a diferir toda verificación hasta la operación real, y la redundancia de dos modelos de proveedores distintos sobre cada imagen con un tercero que reconcilia sus lecturas, cuyo aporte no pudo medirse porque el sistema no conserva las lecturas individuales previas a la reconciliación.
+Dos decisiones no rindieron lo esperado: la ausencia de pruebas automatizadas y la redundancia de dos modelos de visión con un tercero reconciliador, cuyo aporte no pudo medirse por falta de registro previo.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
 %----------------------------------------------------------------------------------------
 \section{Próximos pasos}
 
-Las mejoras propuestas en la sección \ref{subsec:mejoras_ensayos} son la hoja de ruta más concreta del trabajo, ordenadas allí por impacto: una cola de reintentos de impresión, la extensión del modelo de datos para registrar el instante y el formato de recepción del mensaje, la ampliación del catálogo con variedades comerciales y códigos de calibre, la revisión del intervalo de espera por inactividad, y la incorporación de pruebas automatizadas junto con el registro del operador de cada impresión.
-
-Excede el alcance original una línea adicional: el sistema resuelve más del doble de conversaciones que de pedidos, ya que interpreta consultas, confirmaciones y saludos hoy descartados. Ese volumen constituye información sobre la demanda y la interacción con los clientes que el sistema podría aprovechar.
+La hoja de ruta más concreta son las mejoras de la sección \ref{subsec:mejoras_ensayos}: cola de reintentos de impresión, registro del instante y formato de recepción del mensaje, ampliación del catálogo con terminología de proveedor, revisión del intervalo de espera e incorporación de pruebas automatizadas. Excede el alcance original que el sistema resuelva más del doble de conversaciones que de pedidos, al interpretar consultas y confirmaciones hoy descartadas, información sobre la demanda que podría aprovecharse.
