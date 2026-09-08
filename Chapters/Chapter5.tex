@@ -35,7 +35,7 @@ De los requerimientos verificados en la sección \ref{subsec:verificacion_requer
 
 La ejecución se apartó de la planificación en el ordenamiento de las etapas antes que en su contenido. El desarrollo se concentró entre el 20 de abril y comienzos de junio de 2026, con intervenciones puntuales posteriores sobre la interfaz de programación y los flujos de orquestación. La frecuencia de las confirmaciones del repositorio documenta esa cronología, pero no permite contrastar el esfuerzo real contra las 600 horas previstas en la planificación.
 
-La desviación deliberada de mayor consecuencia fue adelantar la puesta en producción respecto del final del desarrollo. El sistema recibió su primer pedido el 4 de junio de 2026, cuando el panel todavía se encontraba en construcción y el comercio aún no contaba con la impresora térmica: durante las primeras cuatro semanas los pedidos interpretados se volcaron a un archivo de texto de consulta manual, y la impresión automática se habilitó recién el 29 de junio, una vez verificada la calidad de la interpretación. La decisión redujo el riesgo de la puesta en marcha, ya que ningún fallo de interpretación pudo traducirse en un ticket erróneo, y aportó cuatro semanas de datos reales que orientaron la ampliación del catálogo. Su costo fue una mayor carga operativa para el personal durante ese lapso.
+La desviación deliberada de mayor consecuencia fue adelantar la puesta en producción respecto del final del desarrollo: el sistema recibió su primer pedido el 4 de junio de 2026 con el panel aún en construcción y sin impresora térmica, volcando los pedidos interpretados a un archivo de consulta manual hasta habilitar la impresión automática el 29 de junio, una vez verificada la calidad de la interpretación. La decisión redujo el riesgo de la puesta en marcha y aportó cuatro semanas de datos reales para ampliar el catálogo, a costa de una mayor carga operativa para el personal.
 
 \subsection{Comportamiento de los riesgos identificados}
 
@@ -43,18 +43,12 @@ De los cinco riesgos previstos en la planificación, dos se manifestaron durante
 
 El riesgo de fallas de integración entre la plataforma de orquestación, la interfaz de programación y los servicios de inteligencia artificial no se materializó. Sobre 7036 ejecuciones se registraron 7 fallas, equivalentes al 0,10 por ciento, y cada una de esas ejecuciones involucra a la totalidad de los componentes de la cadena.
 
-El riesgo de caídas del servidor local de impresión sí se manifestó, y constituye el caso en que el plan de mitigación resultó inefectivo por no haberse implementado. Se registraron 7 episodios de pérdida del vínculo en 50 días, que afectaron a 21 pedidos y dejaron 15 sin ticket emitido, equivalentes al 0,39 por ciento de los procesados. La mitigación prevista consistía en un mecanismo de supervisión y reinicio automático del proceso en el nodo de borde, que no llegó a incorporarse. La resolución quedó en consecuencia a cargo del personal, que debió advertir la falta del comprobante y armar el pedido con una consulta al panel. Corresponde señalar que la evidencia recogida sugiere una mitigación más adecuada que la prevista: dado que la indisponibilidad se resuelve por sí sola en plazos acotados, una cola de reintentos en la nube habría emitido los 15 tickets faltantes sin intervención alguna, y lo habría hecho con independencia de la causa de la caída.
+El riesgo de caídas del servidor local de impresión sí se manifestó: 7 episodios en 50 días afectaron a 21 pedidos y dejaron 15 sin ticket (0,39 por ciento del total), y la mitigación prevista, un watchdog de reinicio automático, no llegó a implementarse, por lo que la recuperación quedó a cargo del personal. La evidencia sugiere, sin embargo, una mitigación más adecuada que la prevista: una cola de reintentos en la nube habría emitido los 15 tickets faltantes con independencia de la causa de la caída, ya que el enlace se restablece por sí solo en plazos acotados.
 
-El riesgo de baja calidad de los mensajes recibidos se manifestó de forma parcial y con un alcance menor al previsto. Los 458 ítems que el sistema no pudo asociar representan el 1,55 por ciento del total, y de ellos solo 80 corresponden a denominaciones sin correspondencia interpretable. La auditoría por formato demostró además que ese error residual no depende de la modalidad del mensaje, de modo que la interpretación multimodal resultó más robusta de lo que la planificación anticipaba. La mitigación efectiva no fue ninguna de las previstas, sino un mecanismo emergente que se describe en el apartado siguiente.
+El riesgo de baja calidad de los mensajes se manifestó de forma parcial: de los 458 ítems no asociados (1,55 por ciento), solo 80 son denominaciones sin correspondencia interpretable, y la auditoría por formato mostró que ese error no depende de la modalidad, por lo que la interpretación multimodal resultó más robusta de lo previsto. La mitigación efectiva fue un mecanismo emergente, descripto en el apartado siguiente, y no ninguna de las previstas.
 
-El riesgo de pérdida de datos en la base no se manifestó. No se detectaron inconsistencias durante el período y el relevamiento de la infraestructura no registra reinicios acumulados en ninguno de los contenedores en servicio.
-
-El riesgo de sobrecostos en el consumo de los servicios de inteligencia artificial no pudo evaluarse con la evidencia disponible en el sistema, ya que el gasto se registra en el panel de facturación del proveedor y no en ninguna de las fuentes empleadas en este trabajo.
-% [PENDIENTE: incorporar el costo real del período 04/06 al 17/08 de 2026 desde el
-% panel de facturación de OpenAI, y contrastarlo contra el presupuesto previsto en
-% la planificación para cerrar este riesgo. Dato no obtenible desde el servidor.]
-
-Como observación transversal, el dimensionamiento de la infraestructura resultó holgado: el servidor virtual sostuvo la totalidad de los servicios con una carga de cómputo y de disco muy por debajo de su capacidad, tras más de siete meses de servicio ininterrumpido.
+El riesgo de pérdida de datos en la base no se manifestó, sin inconsistencias detectadas durante el período. El riesgo de sobrecostos en los servicios de inteligencia artificial no pudo evaluarse con la evidencia disponible, ya que el gasto se registra en el panel de facturación del proveedor.
+% [PENDIENTE: incorporar el costo real del período desde el panel de OpenAI si se quiere cerrar este riesgo.]
 
 \subsection{Técnicas empleadas}
 
@@ -73,16 +67,6 @@ En sentido inverso, dos decisiones no rindieron lo esperado: la ausencia de prue
 %----------------------------------------------------------------------------------------
 \section{Próximos pasos}
 
-Las líneas de continuación se ordenan según su impacto sobre la operación.
+Las mejoras propuestas en la sección \ref{subsec:mejoras_ensayos} son la hoja de ruta más concreta del trabajo, ordenadas allí por impacto: una cola de reintentos de impresión, la extensión del modelo de datos para registrar el instante y el formato de recepción del mensaje, la ampliación del catálogo con variedades comerciales y códigos de calibre, la revisión del intervalo de espera por inactividad, y la incorporación de pruebas automatizadas junto con el registro del operador de cada impresión.
 
-La primera es la implementación de una cola de impresiones pendientes con reintento automático al restablecerse el vínculo con el nodo de borde. Es la mejora de mayor impacto sobre la confiabilidad percibida, ya que habría evitado la totalidad de los 15 pedidos que quedaron sin comprobante, y su alcance es superior al del mecanismo de supervisión previsto en la planificación por resolver el problema con independencia de su causa.
-
-La segunda es la extensión del modelo de datos para incorporar el instante de recepción del mensaje, su formato de origen y una referencia al mensaje original. Esa modificación cerraría la discontinuidad de la cadena de trazabilidad y convertiría en permanentes dos mediciones que este trabajo debió reconstruir por inferencia: la latencia extremo a extremo y el desempeño desagregado por formato de entrada.
-
-La tercera es la ampliación del catálogo con las variedades comerciales y los códigos de calibre de los proveedores, junto con una vista del panel que ordene por frecuencia los ítems no asociados. Ambas medidas atacan el 79,48 por ciento del error residual que responde a limitaciones de cobertura, y transformarían en sistemático el lazo de realimentación que hoy opera de manera reactiva.
-
-La cuarta es la revisión del intervalo de espera por inactividad. La medición demostró que el tiempo de interpretación se ubica en el orden de las unidades de segundo, muy por debajo de los sesenta que dura cada ciclo de espera, de modo que su reducción disminuiría la latencia percibida en los pedidos enviados en un único mensaje. Una caracterización previa de la distribución del tiempo entre mensajes sucesivos de un mismo cliente permitiría fijar ese valor con fundamento empírico.
-
-La quinta es la incorporación de pruebas automatizadas sobre los módulos de interpretación e impresión, junto con el registro del operador que dispara cada impresión desde el panel. La primera cancela la deuda técnica señalada; la segunda separaría de forma explícita las dos poblaciones de impresiones que este trabajo debió distinguir por inferencia.
-
-Por último, la evidencia reunida sugiere una línea de trabajo que excede el alcance original. El sistema resuelve algo más del doble de conversaciones que de pedidos, ya que interpreta consultas, confirmaciones y saludos que no derivan en un encargo. Ese volumen, hoy descartado, constituye información sobre la demanda y sobre la interacción con los clientes que el sistema podría aprovechar.
+Excede el alcance original una línea adicional: el sistema resuelve más del doble de conversaciones que de pedidos, ya que interpreta consultas, confirmaciones y saludos hoy descartados. Ese volumen constituye información sobre la demanda y la interacción con los clientes que el sistema podría aprovechar.
