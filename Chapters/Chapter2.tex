@@ -30,7 +30,7 @@ También se descartó el uso de un microcontrolador, ya que el conjunto de respo
 \subsection{Impresora térmica}
 \label{subsec:impresora}
 
-Para la impresión de los tickets se utiliza una impresora térmica Hasar P-HAS-181 \cite{hasar181}, un modelo de tipo comandera del fabricante argentino Grupo Hasar, orientado al punto de venta. La impresora imprime por cabezal térmico directo sobre rollos de papel de 80 mm de ancho y dispone de tres interfaces de conexión (puerto serie, USB y Ethernet) y de controladores para Windows. Sus comandos de impresión resultan compatibles con ESC/POS \cite{escpos}, el conjunto de instrucciones definido por Epson que constituye el estándar de facto del sector.
+Para la impresión de los tickets se utiliza una impresora térmica Hasar P-HAS-181 \cite{hasar181}, un modelo de tipo comandera del fabricante argentino Grupo Hasar, orientado al punto de venta. La impresora imprime por cabezal térmico directo sobre rollos de papel de 80\,mm de ancho y dispone de tres interfaces de conexión (puerto serie, USB y Ethernet) y de controladores para Windows. Sus comandos de impresión resultan compatibles con ESC/POS \cite{escpos}, el conjunto de instrucciones definido por Epson que constituye el estándar de facto del sector.
 
 En la instalación actual, la impresora se conecta al servidor local por USB. La disponibilidad de una interfaz Ethernet fue, sin embargo, un criterio de selección. El equipo puede requerir un cambio de ubicación dentro del comercio, por ejemplo hacia el sector de armado de pedidos. La conexión por red permitiría ese traslado sin dependencia de la proximidad física con el servidor.
 
@@ -78,7 +78,7 @@ Frente a alternativas comerciales de automatización en la nube, como Zapier \ci
 \subsection{Infraestructura de despliegue}
 \label{subsec:vps_docker}
 
-Los servicios en la nube se alojan en un servidor privado virtual (VPS, del inglés \textit{Virtual Private Server}) del proveedor Hostinger \cite{hostinger}, en su plan KVM 4. Este plan provee 4 núcleos virtuales, 16 GB de memoria RAM, 200 GB de almacenamiento NVMe y 16 TB de transferencia mensual. El dimensionamiento respondió a la carga concurrente del sistema, ya que sobre el mismo servidor conviven la pasarela de mensajería, el motor de flujos, las bases de datos y el panel web.
+Los servicios en la nube se alojan en un servidor privado virtual (VPS, del inglés \textit{Virtual Private Server}) del proveedor Hostinger \cite{hostinger}, en su plan KVM 4. Este plan provee 4 núcleos virtuales, 16\,GB de memoria RAM, 200\,GB de almacenamiento NVMe y 16\,TB de transferencia mensual. El dimensionamiento respondió a la carga concurrente del sistema, ya que sobre el mismo servidor conviven la pasarela de mensajería, el motor de flujos, las bases de datos y el panel web.
 
 Todos los servicios se despliegan de forma contenerizada mediante Docker \cite{docker}. La contenerización empaqueta cada servicio junto con sus dependencias en unidades aisladas y reproducibles, lo que permite describir el despliegue en archivos versionables, reproducir el entorno sin diferencias de configuración y actualizar cada componente de manera independiente.
 

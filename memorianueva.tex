@@ -26,6 +26,19 @@
 \usepackage{hyperref}       % Manejo de hipervínculos y marcadores
 \usepackage{float}
 \usepackage{placeins}    % Provee \FloatBarrier para acotar el desplazamiento de flotantes
+\usepackage{array}       % Provee >{...} para definir tipos de columna propios
+
+% Columna de ancho fijo con el texto alineado a la izquierda: evita los espacios
+% estirados entre palabras que produce la justificación en columnas angostas.
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% Los títulos de sección no se cortan con guión al final de línea: TeX prefiere
+% quebrar en el espacio antes que partir la palabra (comentario del revisor).
+\usepackage{sectsty}
+\newcommand*{\nohyphens}{\hyphenpenalty=10000\exhyphenpenalty=10000\relax}
+\sectionfont{\nohyphens}
+\subsectionfont{\nohyphens}
+\subsubsectionfont{\nohyphens}
 
 % Redefinición de caracteres problemáticos en marcadores
 \hypersetup{
@@ -102,7 +115,7 @@
 
 \begin{abstract}
     \addchaptertocentry{\abstractname}
-    El presente trabajo consiste en el diseño e implementación de un sistema que automatiza la recepción, interpretación y el procesamiento de los pedidos de un mercado de frutas y verduras recibidos a través de mensajería instantánea. El sistema captura pedidos en texto, voz, imagen o documento, e identifica productos, cantidades y unidades mediante modelos de inteligencia artificial. Una vez estructurado el pedido, se imprime en el comercio mediante una impresora térmica conectada a un servidor local. El desarrollo fue realizado para la Tienda de frutas Luján, con el fin de reducir los tiempos operativos, disminuir los errores humanos y mejorar la trazabilidad de la gestión comercial.
+    El presente trabajo consiste en el diseño e implementación de un sistema que automatiza la recepción, interpretación y procesamiento de los pedidos de un mercado de frutas y verduras recibidos a través de mensajería instantánea. El sistema captura pedidos en texto, voz, imagen o documento, e identifica productos, cantidades y unidades mediante modelos de inteligencia artificial. Una vez estructurado el pedido, se imprime en el comercio mediante una impresora térmica conectada a un servidor local. El desarrollo fue realizado para la Tienda de frutas Luján, con el fin de reducir los tiempos operativos, disminuir los errores humanos y mejorar la trazabilidad de la gestión comercial.
 
     Para su desarrollo se aplicaron conocimientos propios de la computación de borde, tales como la distribución del procesamiento entre el borde y la nube, la comunicación segura entre nodos, la actuación local sobre hardware y el diseño de soluciones de bajo costo.
 \end{abstract}
@@ -117,7 +130,9 @@
 
     Agradezco también a mi director, Matías Martini, cuya orientación y experiencia en desarrollo de software e inteligencia artificial aplicada guiaron las decisiones técnicas a lo largo del desarrollo.
 
-    Mi reconocimiento se extiende a mis compañeros y colegas, cuya colaboración fue esencial para superar los desafíos surgidos durante la implementación. Por último, agradezco a mis amigos y a mi familia, cuya paciencia y aliento incondicional fueron mi sostén durante este proceso, permitiéndome perseguir mis proyectos y crecer profesionalmente.
+    Mi reconocimiento se extiende a mis compañeros y colegas, cuya colaboración fue esencial para superar los desafíos surgidos durante la implementación.
+
+    Por último, agradezco a mis amigos y a mi familia, cuya paciencia y aliento incondicional fueron mi sostén durante este proceso, permitiéndome perseguir mis proyectos y crecer profesionalmente.
 \end{acknowledgements}
 
 %----------------------------------------------------------------------------------------

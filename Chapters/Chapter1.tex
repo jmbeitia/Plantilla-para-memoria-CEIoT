@@ -27,7 +27,7 @@ En el presente capítulo se introduce el área en la que se enmarca el trabajo, 
 
 
 %----------------------------------------------------------------------------------------
-%	SECTION 1
+%	SECTION 1 
 %----------------------------------------------------------------------------------------
 
 \section{Mensajería instantánea y gestión de pedidos en comercios minoristas}
@@ -42,7 +42,7 @@ El sistema desarrollado combina componentes de inteligencia artificial (IA) para
 En la figura \ref{fig:diagrama_conceptual} se presenta un esquema conceptual de alto nivel del sistema, en el que el pedido ingresa por el canal de mensajería, se interpreta en la nube y deriva en la impresión local del ticket y en la visualización de la operación. La arquitectura detallada del sistema se describe en el capítulo \ref{Chapter3}.
 
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=0.9\textwidth]{Figures/diagrama_conceptual.png}
 	\caption{Esquema conceptual del sistema: capas, componentes y flujo de datos.}
@@ -91,11 +91,11 @@ Frente a los esquemas puramente centralizados, la computación de borde propone 
 
 En la tabla \ref{tab:comparacion_arte} se comparan los tres paradigmas descriptos según los criterios más relevantes para el caso de uso abordado. El trabajo desarrollado se posiciona en el enfoque híbrido. En la nube se ejecutan las tareas de mayor demanda de cómputo, como la interpretación de los mensajes mediante modelos de IA. En el borde se ejecuta la actuación crítica y de baja latencia, es decir, la impresión local del pedido. De este modo, se busca un compromiso entre costo, personalización y disponibilidad, adecuado a un comercio de baja complejidad tecnológica.
 
-\begin{table}[h]
+\begin{table}[H]
 	\centering
 	\caption{Comparación de paradigmas para la automatización de pedidos en el comercio minorista.}
 	\label{tab:comparacion_arte}
-	\begin{tabular}{p{3.2cm} p{2.6cm} p{2.6cm} p{2.6cm}}
+	\begin{tabular}{L{3.2cm} L{2.6cm} L{2.6cm} L{2.6cm}}
 		\toprule
 		\textbf{Criterio}           & \textbf{Nube pura} & \textbf{Automatización de mensajería} & \textbf{Enfoque híbrido (este trabajo)} \\
 		\midrule

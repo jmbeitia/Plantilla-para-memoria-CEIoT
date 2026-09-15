@@ -15,7 +15,7 @@ En el presente capítulo se describen el diseño y la implementación del sistem
 
 El sistema se organizó en tres capas funcionales. La capa de captura y comunicación recibe los mensajes del canal de mensajería y los prepara para su interpretación. La capa de procesamiento inteligente interpreta el contenido, lo estructura contra el catálogo del comercio y lo persiste. La capa de interacción local e impresión ejecuta la actuación física sobre la impresora del negocio. En la figura \ref{fig:arquitectura_sistema} se presentan las tres capas, sus componentes y el flujo de datos extremo a extremo.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{Figures/arquitectura_sistema.pdf}
   \caption{Arquitectura del sistema en tres capas.}
@@ -80,7 +80,7 @@ El nombre de perfil de WhatsApp, en cambio, resultó insuficiente para identific
 
 Un mismo pedido puede llegar como texto libre, como uno o varios mensajes de voz, como una fotografía de una lista manuscrita, como una captura de una planilla o como un documento adjunto. El flujo resuelve esa diversidad con un nodo de derivación que evalúa el tipo de contenido y envía el mensaje a la rama correspondiente. En la figura \ref{fig:flujo_captura} se muestra el procesamiento completo de esta capa.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{Figures/flujo_captura.pdf}
   \caption{Procesamiento de la capa de captura, desde el mensaje entrante hasta el texto agrupado.}
@@ -102,7 +102,7 @@ La solución adoptada consiste en un mecanismo de agrupación por ventana tempor
 
 La elección de Redis para este mecanismo responde a la naturaleza de los datos involucrados. Se trata de información de carácter transitorio, con alta frecuencia de escritura y lectura, cuya pérdida ante una falla no compromete la operación del negocio. La base relacional se reservó para los datos que sí deben persistir y auditarse.
 
-La ventana se fijó en sesenta segundos. El valor no se eligió a partir del comportamiento de los clientes, sino del tiempo de procesamiento del propio sistema. El intervalo entre el ingreso de un mensaje y la finalización de su procesamiento por los agentes resultó cercano al minuto. Una ventana menor habría cerrado la agrupación antes de que los mensajes previos terminaran de procesarse, con el riesgo de fragmentar el pedido. El valor adoptado constituye una cota conservadora, alineada con la latencia observada. La reducción de ese tiempo de procesamiento permitiría acortar la ventana y, con ella, el tiempo total de respuesta del sistema. Esa optimización se plantea como línea de trabajo futuro en el capítulo \ref{Chapter5}.
+La ventana se fijó en 60 segundos. El valor no se eligió a partir del comportamiento de los clientes, sino del tiempo de procesamiento del propio sistema. El intervalo entre el ingreso de un mensaje y la finalización de su procesamiento por los agentes resultó cercano al minuto. Una ventana menor habría cerrado la agrupación antes de que los mensajes previos terminaran de procesarse, con el riesgo de fragmentar el pedido. El valor adoptado constituye una cota conservadora, alineada con la latencia observada. La reducción de ese tiempo de procesamiento permitiría acortar la ventana y, con ella, el tiempo total de respuesta del sistema. Esa optimización se plantea como línea de trabajo futuro en el capítulo \ref{Chapter5}.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -118,7 +118,7 @@ Esta capa resuelve la conectividad entre los componentes del sistema. Se describ
 
 La conectividad del sistema comprende tres tramos con características distintas. En la figura \ref{fig:topologia_despliegue} se presenta la topología de despliegue, con los servicios contenerizados del servidor virtual y los componentes instalados en el comercio.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{Figures/topologia_despliegue.pdf}
   \caption{Topología de despliegue del sistema.}
@@ -232,7 +232,7 @@ Se consideró como alternativa una normalización previa por reglas o por simili
 
 La API se organizó por recursos, con un prefijo común y un archivo de rutas por entidad. En la tabla \ref{tab:endpoints} se resumen los grupos de recursos y su mecanismo de acceso.
 
-\begin{table}[htbp]
+\begin{table}[H]
   \centering
   \caption{Grupos de recursos de la interfaz de programación.}
   \label{tab:endpoints}
@@ -262,7 +262,7 @@ La creación de un pedido desde el flujo automático y su creación desde el pan
 
 La persistencia se resolvió sobre PostgreSQL, con acceso mediante el ORM Prisma. El esquema se controla por migraciones versionadas, lo que permite reproducir la estructura de la base en cualquier entorno. En la figura \ref{fig:der} se presenta el diagrama entidad-relación con las entidades principales.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{Figures/der_base_datos.pdf}
   \caption{Diagrama entidad-relación de la base de datos.}
@@ -316,14 +316,14 @@ El ticket es la salida física del sistema y el insumo directo para el armado de
   \label{fig:esquema_ticket}
 \end{figure}
 
-El diseño del ticket estuvo condicionado por el medio. El ancho útil del papel es de ochenta milímetros, lo que limita la cantidad de caracteres por línea y obliga a priorizar la información. Por ese motivo, el servidor de impresión admite distintos tamaños de tipografía, que se aplican mediante comandos ESC/POS. Los datos que el personal necesita leer a distancia, en particular el nombre del cliente, se imprimen en tamaño ampliado, mientras que el detalle de los productos se mantiene en tamaño normal para aprovechar el ancho disponible.
+El diseño del ticket estuvo condicionado por el medio. El ancho útil del papel es de 80 milímetros, lo que limita la cantidad de caracteres por línea y obliga a priorizar la información. Por ese motivo, el servidor de impresión admite distintos tamaños de tipografía, que se aplican mediante comandos ESC/POS. Los datos que el personal necesita leer a distancia, en particular el nombre del cliente, se imprimen en tamaño ampliado, mientras que el detalle de los productos se mantiene en tamaño normal para aprovechar el ancho disponible.
 
 \subsection{El panel web de control}
 \label{subsec:panel}
 
 El panel se desarrolló con Angular y la biblioteca de componentes Angular Material. Concentra la operación diaria y la administración del sistema. El acceso está protegido por autenticación, y las vistas de administración quedan restringidas según el rol de la persona que ingresa. En la figura \ref{fig:sitemap_panel} se presenta la estructura de navegación del panel.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{Figures/sitemap_panel.pdf}
   \caption{Estructura de navegación del panel web de control.}
@@ -356,7 +356,7 @@ La seguridad se abordó en tres frentes: el control de acceso, la protección de
 
 El sistema distingue dos tipos de consumidores, con mecanismos de autenticación distintos. Las personas acceden al panel con credenciales y obtienen un testigo de sesión. Los servicios internos, como el flujo de n8n, no disponen de una sesión de usuario y se autentican con una clave de servicio. En la figura \ref{fig:auth} se representan ambos mecanismos.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
   \includegraphics[width=\textwidth]{Figures/flujo_autenticacion.pdf}
   \caption{Mecanismos de autenticación para personas y para servicios internos.}
