@@ -55,7 +55,7 @@ La primera es la base de datos relacional del sistema, que registra cada pedido,
 
 La segunda es el registro de ejecuciones de la plataforma de orquestación, que conserva el instante de inicio y de finalización de cada flujo junto con su estado final. Esa información permite acotar el tiempo de interpretación, que no queda registrado en la base relacional del sistema.
 
-La tercera es la plataforma de atención vinculada al canal de mensajería, que conserva cada mensaje entrante con su marca temporal, su contacto de origen y el tipo de contenido de sus adjuntos. Esa fuente aporta la única información disponible sobre el formato del mensaje original, dimensión que las dos anteriores no permiten discriminar, y sostiene la auditoría de la sección \ref{subsec:ensayo_formatos}. Su vinculación con los pedidos no es directa, ya que ambos sistemas no comparten identificadores, y debió reconstruirse por coincidencia del número de contacto y proximidad temporal según el procedimiento que allí se detalla.
+La tercera es la plataforma de atención vinculada al canal de mensajería, que conserva cada mensaje entrante con su marca temporal, su contacto de origen y el tipo de contenido de sus adjuntos. Esa fuente aporta la única información disponible sobre el formato del mensaje original, dimensión que las dos anteriores no permiten discriminar, y sostiene la auditoría de la subsección \ref{subsec:ensayo_formatos}. Su vinculación con los pedidos no es directa, ya que ambos sistemas no comparten identificadores, y debió reconstruirse por coincidencia del número de contacto y proximidad temporal según el procedimiento que allí se detalla.
 
 \subsection{Estrategia de verificación adoptada}
 \label{subsec:estrategia_verificacion}
@@ -69,7 +69,7 @@ En su reemplazo, la verificación se apoyó en la operación real del sistema du
 
 La planificación del trabajo definió, para cada requerimiento, un método de verificación y un método de validación, pero no estableció valores numéricos de corte con anterioridad al desarrollo. Los ensayos descriptos en este capítulo son, en consecuencia, de caracterización: se orientan a determinar el comportamiento efectivo del sistema en operación antes que a contrastarlo contra umbrales preestablecidos.
 
-El criterio de aceptación que operó de manera efectiva fue la validación por parte del cliente en el entorno real. El sistema se incorporó a la operación diaria del comercio y permaneció en uso continuo durante todo el período analizado, lo que constituye una forma de aceptación por uso sostenido. En la sección \ref{subsec:verificacion_requerimientos} se contrasta cada requerimiento contra la evidencia obtenida.
+El criterio de aceptación que operó de manera efectiva fue la validación por parte del cliente en el entorno real. El sistema se incorporó a la operación diaria del comercio y permaneció en uso continuo durante todo el período analizado, lo que constituye una forma de aceptación por uso sostenido. En la subsección \ref{subsec:verificacion_requerimientos} se contrasta cada requerimiento contra la evidencia obtenida.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 2
@@ -108,7 +108,7 @@ En la tabla \ref{tab:errores_conectividad} se detalla la clasificación de los e
 
 La totalidad de los errores del período de operación automática corresponde a interrupciones del vínculo de comunicación. Los códigos 530 y 520 son emitidos por el proveedor del túnel cuando el extremo local no responde, situación que se produce ante una caída de la conexión a Internet del comercio o ante la detención del proceso en el servidor local. Ningún error se originó en la impresora ni en el formateo del ticket, lo que indica que la actuación física en el borde resultó estable durante todo el período.
 
-Este comportamiento respalda el criterio de distribución del cómputo adoptado en la sección \ref{subsec:criterio_distribucion}. La única dependencia externa del proceso de impresión es la llegada de la orden desde la nube, y una vez que esa orden alcanza el nodo de borde la operación se completa sin intermediarios.
+Este comportamiento respalda el criterio de distribución del cómputo adoptado en la subsección \ref{subsec:criterio_distribucion}. La única dependencia externa del proceso de impresión es la llegada de la orden desde la nube, y una vez que esa orden alcanza el nodo de borde la operación se completa sin intermediarios.
 
 \subsection{Análisis de los episodios de pérdida de conectividad}
 \label{subsec:episodios_conectividad}
@@ -140,7 +140,7 @@ Los dos episodios prolongados concentran 14 de los 21 pedidos afectados y presen
 
 El registro de impresiones marca los 22 casos como atendidos, pero esa marca refleja la resolución operativa del personal, no la emisión del ticket: tres de los pedidos afectados ya tenían un ticket emitido (la falla fue sobre una reimpresión), otros tres lo recibieron después del episodio, y los 15 restantes, el 0,39 por ciento de los 3871 pedidos del período, no registran ninguna emisión exitosa y se armaron sin comprobante impreso.
 
-La indisponibilidad del vínculo no interrumpe la operación, ya que el pedido permanece accesible en el panel y el personal puede continuar el armado, pero el sistema carece de un mecanismo de reintento automático y la recuperación depende de que el personal advierta la falta del ticket. Como el enlace se restablece por sí solo en plazos acotados, una cola de reintentos, la mejora propuesta en la sección \ref{subsec:mejoras_ensayos}, resolvería el problema sin intervención.
+La indisponibilidad del vínculo no interrumpe la operación, ya que el pedido permanece accesible en el panel y el personal puede continuar el armado, pero el sistema carece de un mecanismo de reintento automático y la recuperación depende de que el personal advierta la falta del ticket. Como el enlace se restablece por sí solo en plazos acotados, una cola de reintentos, la mejora propuesta en la subsección \ref{subsec:mejoras_ensayos}, resolvería el problema sin intervención.
 
 %----------------------------------------------------------------------------------------
 %	SECTION 3
@@ -220,7 +220,7 @@ La plataforma de orquestación coordina la recepción de los mensajes, la invoca
 
 Sobre 7036 ejecuciones se registraron 7 fallas, lo que arroja una tasa de error del 0,10 por ciento. Ese valor verifica el requerimiento de integración entre los componentes, ya que cada ejecución del flujo de interpretación involucra al canal de mensajería, a la base en memoria, a los servicios de inteligencia artificial y a la base relacional.
 
-La duración media del flujo de interpretación no debe leerse como tiempo de procesamiento, según se analiza en la sección \ref{subsec:composicion_latencia}.
+La duración media del flujo de interpretación no debe leerse como tiempo de procesamiento, según se analiza en la subsección \ref{subsec:composicion_latencia}.
 
 El flujo de sincronización de contactos, que actualiza de forma programada los nombres de los clientes a partir de la agenda del comercio, presenta una duración media del orden de la hora, con 13 ejecuciones en 14 días. Ese valor no refleja un costo de cómputo sino las esperas deliberadas que el flujo intercala entre lotes para respetar los límites de tasa de las interfaces que consume. Al operar de forma desacoplada del flujo de pedidos, no incide sobre la latencia percibida por el comercio.
 
@@ -290,7 +290,7 @@ El primer tramo se midió a partir de la duración de las ejecuciones del flujo 
 
 La distribución vuelve a presentar dos poblaciones separadas por un intervalo vacío. El 47,39 por ciento de las ejecuciones finalizó en menos de cinco segundos y el 52,61 por ciento restante superó los 60, sin ningún caso registrado entre ambos valores.
 
-La explicación se encuentra en el mecanismo de agrupación de mensajes descripto en la sección \ref{subsec:criterio_distribucion}. Ese mecanismo no impone una espera fija sino una espera por inactividad. Cada mensaje entrante se incorpora a una lista asociada al cliente y la ejecución aguarda 60 segundos antes de reevaluar el estado de esa lista. Si durante ese lapso llegó un mensaje posterior, la ejecución concluye sin procesar y delega la interpretación en la ejecución más reciente. Si no llegó ninguno, procede a interpretar el conjunto completo y elimina la lista.
+La explicación se encuentra en el mecanismo de agrupación de mensajes descripto en la subsección \ref{subsec:criterio_distribucion}. Ese mecanismo no impone una espera fija sino una espera por inactividad. Cada mensaje entrante se incorpora a una lista asociada al cliente y la ejecución aguarda 60 segundos antes de reevaluar el estado de esa lista. Si durante ese lapso llegó un mensaje posterior, la ejecución concluye sin procesar y delega la interpretación en la ejecución más reciente. Si no llegó ninguno, procede a interpretar el conjunto completo y elimina la lista.
 
 La distribución permite entonces distinguir tres comportamientos. Las 3180 ejecuciones que finalizaron en menos de cinco segundos corresponden a mensajes descartados por los filtros previos, que excluyen los mensajes de grupos y los emitidos por el propio comercio. Las 1744 comprendidas entre 60 y 62 segundos corresponden a mensajes sucesivos de un mismo pedido, que concluyeron al detectar la llegada de un mensaje posterior. Las 1786 restantes son las que ejecutaron efectivamente la interpretación, y de ellas 1405 completaron el procesamiento en menos de 15 segundos adicionales a la espera, 301 lo hicieron entre 15 y 60, 79 entre 60 y 240, y una sola superó ese valor.
 
@@ -309,7 +309,7 @@ El requerimiento de admitir pedidos en texto, voz, imagen y documento exige comp
 
 \subsubsection*{Reconstrucción del vínculo entre mensaje y pedido}
 
-Los dos sistemas no comparten identificadores, por lo que la correspondencia entre un mensaje y el pedido se reconstruyó emparejando cada pedido con el último mensaje entrante del mismo contacto anterior a su registro, aprovechando el mecanismo de agrupación por inactividad de la sección \ref{subsec:composicion_latencia}. La distancia mediana entre ambos es de 72 segundos (primer cuartil 68, tercer cuartil 85), coherente con la espera de 60 segundos más el procesamiento. Se consideraron atribuibles los pedidos con un mensaje precedente a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana (78,48 por ciento).
+Los dos sistemas no comparten identificadores, por lo que la correspondencia entre un mensaje y el pedido se reconstruyó emparejando cada pedido con el último mensaje entrante del mismo contacto anterior a su registro, aprovechando el mecanismo de agrupación por inactividad de la subsección \ref{subsec:composicion_latencia}. La distancia mediana entre ambos es de 72 segundos (primer cuartil 68, tercer cuartil 85), coherente con la espera de 60 segundos más el procesamiento. Se consideraron atribuibles los pedidos con un mensaje precedente a no más de 120 segundos, criterio que alcanza a 3038 de los 3871 pedidos de la ventana (78,48 por ciento).
 
 La cobertura del emparejamiento se mantuvo estable a lo largo del período (mediana diaria del 79 por ciento, mínimo del 61 por ciento), sin días anómalos, lo que descarta que el subconjunto atribuido corresponda a un tramo particular de la operación.
 
@@ -343,7 +343,7 @@ El resultado principal es la ausencia de diferencias apreciables en la tasa de a
 
 El segundo resultado es que el formato sí determina el tamaño del pedido. Un pedido enviado por texto contiene en promedio 5,99 ítems y uno enviado por audio 5,24, mientras que uno enviado por imagen contiene 11,67 y uno enviado como documento 26,50. Las modalidades de imagen y documento concentran los pedidos extensos, que son los que el comercio recibe como lista completa de reposición, y su aporte al volumen total de ítems resulta muy superior al que sugiere su participación en la cantidad de pedidos: la imagen representa el 13,33 por ciento de los pedidos pero el 23,08 por ciento de los ítems.
 
-La combinación de ambos resultados corrige la lectura planteada como hipótesis en la sección \ref{subsec:items_no_reconocidos}. El error residual no se concentra en la modalidad de imagen. Lo que la imagen concentra son los pedidos extensos con terminología de proveedor, de modo que la asociación entre listas manuscritas y denominaciones no interpretables responde al contenido de esos pedidos y no a una degradación de la interpretación por el hecho de provenir de una fotografía.
+La combinación de ambos resultados corrige la lectura planteada como hipótesis en la subsección \ref{subsec:items_no_reconocidos}. El error residual no se concentra en la modalidad de imagen. Lo que la imagen concentra son los pedidos extensos con terminología de proveedor, de modo que la asociación entre listas manuscritas y denominaciones no interpretables responde al contenido de esos pedidos y no a una degradación de la interpretación por el hecho de provenir de una fotografía.
 
 \subsubsection*{Limitaciones de la auditoría}
 
@@ -353,7 +353,7 @@ La primera es que el indicador es la tasa de asociación con el catálogo, no la
 
 La segunda es que el tiempo extremo a extremo no puede desagregarse por formato, ya que el registro de ejecuciones no discrimina la modalidad procesada, lo que impide aislar el costo de la transcripción de audio o de la lectura de imagen dentro de la latencia total.
 
-La tercera es que el 21,52 por ciento de los pedidos de la ventana no pudo atribuirse a ningún mensaje próximo. Ese conjunto tiene pedidos más grandes (10,78 ítems) y menor asociación (96,75 por ciento), por lo que su exclusión eleva el valor global de la muestra auditada por encima del 98,45 por ciento real. La comparación entre formatos no se ve afectada porque el sesgo opera por igual sobre todos, pero los valores de la tabla \ref{tab:formatos} no deben leerse como la tasa de asociación del sistema, reportada en la sección \ref{subsec:items_no_reconocidos}.
+La tercera es que el 21,52 por ciento de los pedidos de la ventana no pudo atribuirse a ningún mensaje próximo. Ese conjunto tiene pedidos más grandes (10,78 ítems) y menor asociación (96,75 por ciento), por lo que su exclusión eleva el valor global de la muestra auditada por encima del 98,45 por ciento real. La comparación entre formatos no se ve afectada porque el sesgo opera por igual sobre todos, pero los valores de la tabla \ref{tab:formatos} no deben leerse como la tasa de asociación del sistema, reportada en la subsección \ref{subsec:items_no_reconocidos}.
 
 \subsection{Ensayo de interfaz}
 \label{subsec:ensayo_interfaz}
@@ -409,7 +409,7 @@ Los requerimientos se agrupan según la naturaleza de la evidencia. La tabla \re
     \end{tabular}
 \end{table}
 
-La tabla \ref{tab:verificacion_funcional} reúne los requerimientos verificados por comprobación funcional cuyo resultado aporta algo más que el cumplimiento. Los restantes se omiten por no arrojar un resultado distinto de este: la persistencia y el uso de Redis de las secciones \ref{subsec:modelo_datos} y \ref{subsec:agrupacion} (1.4 y 1.5), el panel con sus alertas y su configuración del catálogo de la sección \ref{subsec:panel} (1.9, 1.10 y 4.2), el acceso sin instalación de la sección \ref{subsec:ensayo_interfaz} (4.1) y el versionado de los flujos (5.3).
+La tabla \ref{tab:verificacion_funcional} reúne los requerimientos verificados por comprobación funcional cuyo resultado aporta algo más que el cumplimiento. Los restantes se omiten por no arrojar un resultado distinto de este: la persistencia y el uso de Redis de las subsecciones \ref{subsec:modelo_datos} y \ref{subsec:agrupacion} (1.4 y 1.5), el panel con sus alertas y su configuración del catálogo de la subsección \ref{subsec:panel} (1.9, 1.10 y 4.2), el acceso sin instalación de la subsección \ref{subsec:ensayo_interfaz} (4.1) y el versionado de los flujos (5.3).
 
 \begin{table}[H]
     \centering
@@ -443,11 +443,11 @@ La segunda es la cobertura frente a la terminología del comercio mayorista. Las
 
 La tercera es la ausencia de reintento automático de la impresión. Los episodios de pérdida de conectividad dejaron 15 pedidos sin ticket, el 0,39 por ciento del total, y su recuperación quedó a cargo del personal, que debió advertir la situación y armar el pedido sin comprobante.
 
-La cuarta es la ausencia de registro del instante de recepción y del formato de origen del mensaje en la base de datos. Esa omisión impide medir la latencia extremo a extremo de forma directa y comparar modalidades de entrada, e introduce la discontinuidad de trazabilidad de la sección \ref{subsec:trazabilidad}.
+La cuarta es la ausencia de registro del instante de recepción y del formato de origen del mensaje en la base de datos. Esa omisión impide medir la latencia extremo a extremo de forma directa y comparar modalidades de entrada, e introduce la discontinuidad de trazabilidad de la subsección \ref{subsec:trazabilidad}.
 
 La quinta es la ausencia de identificación del operador en el registro de impresiones. El campo previsto permaneció sin valor en todos los casos, por lo que la distinción entre impresión automática y reimpresión manual debió inferirse de la distribución de latencias.
 
-La sexta es la ausencia de pruebas automatizadas, señalada en la sección \ref{subsec:estrategia_verificacion}, que impide detectar regresiones de manera anticipada.
+La sexta es la ausencia de pruebas automatizadas, señalada en la subsección \ref{subsec:estrategia_verificacion}, que impide detectar regresiones de manera anticipada.
 
 \subsection{Mejoras propuestas}
 \label{subsec:mejoras_ensayos}
