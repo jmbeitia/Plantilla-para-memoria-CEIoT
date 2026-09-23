@@ -452,16 +452,13 @@ La sexta es la ausencia de pruebas automatizadas, señalada en la subsección \r
 \subsection{Mejoras propuestas}
 \label{subsec:mejoras_ensayos}
 
-De las limitaciones anteriores se desprenden seis mejoras concretas, que se retoman en el capítulo \ref{Chapter5}.
+De las limitaciones anteriores se desprenden seis mejoras concretas, que se retoman en el capítulo \ref{Chapter5}:
 
-La primera es una vista de ítems no asociados en el panel, ordenada por frecuencia, que permita dar de alta los productos faltantes de forma sistemática y no reactiva. La medición indica que 123 de los 458 casos, el 0,42 por ciento de los ítems procesados, se habrían evitado con el alta oportuna de productos que luego se incorporaron o estaban dados de baja. Corresponde además revisar el criterio de baja, ya que los clientes siguen pidiendo artículos desactivados.
-
-La segunda es sumar al catálogo las variedades comerciales y los códigos de calibre de los proveedores, vinculados a su producto genérico, lo que permitiría interpretar las listas de proveedor con la precisión que ya alcanzan los pedidos minoristas.
-
-La tercera es una cola de impresiones pendientes con reintento automático al restablecerse el vínculo. Los episodios registrados muestran que la indisponibilidad del enlace se resuelve sola en plazos acotados, de modo que un reintento diferido habría emitido los 15 tickets faltantes sin intervención del personal. Es la mejora de mayor impacto sobre la confiabilidad percibida.
-
-La cuarta es agregar a la tabla de pedidos el instante de recepción, el formato de origen y una referencia al mensaje original, lo que permitiría medir la latencia extremo a extremo y el desempeño por formato de forma permanente, y cerraría la discontinuidad de trazabilidad.
-
-La quinta es el registro efectivo del operador que dispara cada impresión desde el panel, lo que separaría de forma explícita las dos poblaciones que este capítulo debió distinguir por inferencia.
-
-La sexta es la revisión del intervalo de espera por inactividad. El tiempo de interpretación se ubica en el orden de las unidades de segundo, muy por debajo de los 60 segundos de cada ciclo de espera, y 1744 de las 3530 ejecuciones que ingresaron al mecanismo concluyeron sin procesar por la llegada de un mensaje posterior. Reducir el intervalo bajaría la latencia percibida en los pedidos de un único mensaje sin afectar la agrupación de los fragmentados; medir antes la distribución del tiempo entre mensajes sucesivos de un mismo cliente permitiría fijar ese valor con fundamento empírico.
+\begin{itemize}
+    \item Una vista de ítems no asociados en el panel, ordenada por frecuencia, que permita dar de alta los productos faltantes de forma sistemática y no reactiva. La medición indica que 123 de los 458 casos, el 0,42 por ciento de los ítems procesados, se habrían evitado con el alta oportuna de productos que luego se incorporaron o estaban dados de baja. Corresponde además revisar el criterio de baja, ya que los clientes siguen pidiendo artículos desactivados.
+    \item Sumar al catálogo las variedades comerciales y los códigos de calibre de los proveedores, vinculados a su producto genérico, lo que permitiría interpretar las listas de proveedor con la precisión que ya alcanzan los pedidos minoristas.
+    \item Una cola de impresiones pendientes con reintento automático al restablecerse el vínculo. Los episodios registrados muestran que la indisponibilidad del enlace se resuelve sola en plazos acotados, de modo que un reintento diferido habría emitido los 15 tickets faltantes sin intervención del personal. Es la mejora de mayor impacto sobre la confiabilidad percibida.
+    \item Agregar a la tabla de pedidos el instante de recepción, el formato de origen y una referencia al mensaje original, lo que permitiría medir la latencia extremo a extremo y el desempeño por formato de forma permanente, y cerraría la discontinuidad de trazabilidad.
+    \item El registro efectivo del operador que dispara cada impresión desde el panel, lo que separaría de forma explícita las dos poblaciones que este capítulo debió distinguir por inferencia.
+    \item La revisión del intervalo de espera por inactividad. El tiempo de interpretación se ubica en el orden de las unidades de segundo, muy por debajo de los 60 segundos de cada ciclo de espera, y 1744 de las 3530 ejecuciones que ingresaron al mecanismo concluyeron sin procesar por la llegada de un mensaje posterior. Reducir el intervalo bajaría la latencia percibida en los pedidos de un único mensaje sin afectar la agrupación de los fragmentados; medir antes la distribución del tiempo entre mensajes sucesivos de un mismo cliente permitiría fijar ese valor con fundamento empírico.
+\end{itemize}
